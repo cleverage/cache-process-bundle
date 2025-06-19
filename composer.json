@@ -31,9 +31,19 @@
         "symfony/cache": "^6.4|^7.1"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "*",
+        "phpstan/extension-installer": "*",
+        "phpstan/phpstan": "*",
+        "phpstan/phpstan-symfony": "*",
+        "phpunit/phpunit": "*",
+        "rector/rector": "*",
+        "roave/security-advisories": "dev-latest",
+        "symfony/test-pack": "^1.1"
     },
     "config": {
         "allow-plugins": {
+            "phpstan/extension-installer": true,
+            "symfony/flex": true,
             "symfony/runtime": true
         },
         "sort-packages": true
