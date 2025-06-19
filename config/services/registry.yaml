@@ -1,0 +1,4 @@
+services:
+    cleverage_cache_process.registry.adapter:
+        class: CleverAge\CacheProcessBundle\Registry\AdapterRegistry
+        public: false

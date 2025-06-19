@@ -8,119 +8,38 @@
  * file that was distributed with this source code.
  */
 
-namespace CleverAge\CacheProcessBundle\src\Task;
+namespace CleverAge\CacheProcessBundle\Task;
 
+use CleverAge\CacheProcessBundle\Registry\AdapterRegistry;
 use CleverAge\ProcessBundle\Model\AbstractConfigurableTask;
 use CleverAge\ProcessBundle\Model\ProcessState;
-use CleverAge\ProcessBundle\Registry\TransformerRegistry;
-use CleverAge\ProcessBundle\Transformer\TransformerTrait;
-use Psr\Cache\CacheItemPoolInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
-use Symfony\Component\OptionsResolver\Exception\ExceptionInterface;
 use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
-use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 
-/**
- * Class AbstractCacheTask
- *
- * @author Madeline Veyrenc <mveyrenc@clever-age.com>
- */
 abstract class AbstractCacheTask extends AbstractConfigurableTask
 {
-    use TransformerTrait;
-
-    /** @var CacheItemPoolInterface */
-    private $cache;
+    public function __construct(protected AdapterRegistry $registry) {}
 
     /**
-     * SetterTask constructor.
-     *
-     * @param LoggerInterface           $logger
-     * @param PropertyAccessorInterface $accessor
-     * @param CacheItemPoolInterface    $cache
-     * @param TransformerRegistry       $transformerRegistry
-     */
-    public function __construct(
-        LoggerInterface $logger,
-        PropertyAccessorInterface $accessor,
-        CacheItemPoolInterface $cache,
-        TransformerRegistry $transformerRegistry
-    ) {
-        $this->logger = $logger;
-        $this->accessor = $accessor;
-        $this->cache = $cache;
-        $this->transformerRegistry = $transformerRegistry;
-    }
-
-    /**
-     * @return CacheItemPoolInterface
-     */
-    public function getCache(): CacheItemPoolInterface
-    {
-        return $this->cache;
-    }
-
-    /**
-     * @param OptionsResolver $resolver
-     *
-     * @throws AccessException
      * @throws UndefinedOptionsException
+     * @throws AccessException
      */
-    protected function configureOptions(OptionsResolver $resolver)
+    protected function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setRequired(
-            [
-                'key',
-            ]
-        );
-        $resolver->setAllowedTypes('key', ['array', 'null']);
+        $resolver->setRequired(['adapter', 'key']);
 
-        /** @noinspection PhpUnusedParameterInspection */
-        $resolver->setNormalizer(
-            'key',
-            function (Options $options, $value) {
-                $mappingResolver = new OptionsResolver();
-                $this->configureMappingOptions($mappingResolver);
-
-                return $mappingResolver->resolve(
-                    $value ?? []
-                );
-            }
-        );
+        $resolver->setAllowedTypes('adapter', ['string']);
+        $resolver->setAllowedTypes('key', ['string']);
     }
 
-    /**
-     * @param OptionsResolver $resolver
-     *
-     * @throws ExceptionInterface
-     */
-    protected function configureMappingOptions(OptionsResolver $resolver)
-    {
-        $resolver->setDefaults(
-            [
-                'code' => null, // Source property
-                'constant' => null,
-            ]
-        );
-        $resolver->setAllowedTypes('code', ['NULL', 'string', 'array']);
-
-        $this->configureTransformersOptions($resolver);
-    }
-
-    /**
-     * @param ProcessState $state
-     *
-     * @throws ExceptionInterface
-     * @return string
-     *
-     */
-    protected function getKeyCache(ProcessState $state)
+    protected function getMergedOptions(ProcessState $state): array
     {
         $options = $this->getOptions($state);
 
-        return $this->transformValue($state->getInput(), $options['key']);
+        /** @var array<mixed> $input */
+        $input = $state->getInput() ?: [];
+
+        return array_merge($options, $input);
     }
 }

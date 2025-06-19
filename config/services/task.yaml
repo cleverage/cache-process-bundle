@@ -1,0 +1,20 @@
+services:
+    cleverage_cache_process.task.get:
+        class: CleverAge\CacheProcessBundle\Task\GetTask
+        public: false
+        shared: false
+        arguments:
+            - '@cleverage_cache_process.registry.adapter'
+    CleverAge\CacheProcessBundle\Task\GetTask:
+        alias: cleverage_cache_process.task.get
+        public: true
+
+    cleverage_cache_process.task.set:
+        class: CleverAge\CacheProcessBundle\Task\SetTask
+        public: false
+        shared: false
+        arguments:
+            - '@cleverage_cache_process.registry.adapter'
+    CleverAge\CacheProcessBundle\Task\SetTask:
+        alias: cleverage_cache_process.task.set
+        public: true
