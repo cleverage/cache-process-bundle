@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace CleverAge\CacheProcessBundle\Task;
+namespace CleverAge\CacheProcessBundle\src\Task;
 
 use CleverAge\ProcessBundle\Model\AbstractConfigurableTask;
 use CleverAge\ProcessBundle\Model\ProcessState;

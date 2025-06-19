@@ -8,37 +8,32 @@
  * file that was distributed with this source code.
  */
 
-namespace CleverAge\CacheProcessBundle\Transformer;
+namespace CleverAge\CacheProcessBundle\src\Task;
 
+use CleverAge\ProcessBundle\Model\ProcessState;
 use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\OptionsResolver\Exception\ExceptionInterface;
 
 /**
- * Class DeleterTransformer
+ * Class DeleterTask
  *
  * @author Madeline Veyrenc <mveyrenc@clever-age.com>
  */
-class DeleterTransformer extends AbstractCacheTransformer
+class DeleterTask extends AbstractCacheTask
 {
     /**
-     * {@inheritDoc}
+     * @param ProcessState $state
      *
-     * @throws \UnexpectedValueException
      * @throws InvalidArgumentException
+     * @throws ExceptionInterface
      */
-    public function transform($value, array $options = [])
+    public function execute(ProcessState $state)
     {
-        $keyValue = $this->getKeyCache($value, $options);
+        $keyValue = $this->getKeyCache($state);
+        $input = $state->getInput();
 
         $this->getCache()->deleteItem($keyValue);
 
-        return $value;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getCode()
-    {
-        return 'cache_deleter';
+        $state->setOutput($input);
     }
 }

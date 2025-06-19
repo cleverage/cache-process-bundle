@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace CleverAge\CacheProcessBundle\Tests\Transformer;
+namespace CleverAge\CacheProcessBundle\tests\Transformer;
 
 use CleverAge\ProcessBundle\Tests\AbstractProcessTest;
 use Psr\Cache\CacheItemPoolInterface;

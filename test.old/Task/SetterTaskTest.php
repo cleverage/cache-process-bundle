@@ -8,16 +8,17 @@
  * file that was distributed with this source code.
  */
 
-namespace CleverAge\CacheProcessBundle\Tests\Transformer;
+namespace CleverAge\CacheProcessBundle\tests\Task;
+
 
 use CleverAge\ProcessBundle\Tests\AbstractProcessTest;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\InvalidArgumentException;
 
 /**
- * Assert the correct behavior of cache deleter
+ * Assert the correct behavior of cache setter
  */
-class DeleterTransformerTest extends AbstractProcessTest
+class SetterTaskTest extends AbstractProcessTest
 {
     /** @var CacheItemPoolInterface|null */
     protected $cache;
@@ -25,7 +26,7 @@ class DeleterTransformerTest extends AbstractProcessTest
     /**
      * @throws InvalidArgumentException
      */
-    public function testDeleteExistingCache()
+    public function testSetExistingCache()
     {
         if ($this->cache) {
             $input = [
@@ -46,21 +47,21 @@ class DeleterTransformerTest extends AbstractProcessTest
                 ],
             ];
 
-            $cacheItem = $this->cache->getItem('DeleterTransformerTest_testDeleteExistingCache');
+            $cacheItem = $this->cache->getItem('SetterTaskTest_testSetExistingCache');
             $cacheItem->set([]);
             $this->cache->save($cacheItem);
 
-            $result = $this->processManager->execute('test.cache_deleter_transformer.delete_existing_cache', $input);
-            self::assertEquals($input, $result);
+            $this->processManager->execute('test.cache_setter_task.set_existing_cache', $input);
 
-            self::assertFalse($this->cache->hasItem('DeleterTransformerTest_testDeleteExistingCache'));
+            $resultCacheItem = $this->cache->getItem('SetterTaskTest_testSetExistingCache');
+            self::assertEquals($input[0], $resultCacheItem->get());
         }
     }
 
     /**
      * @throws InvalidArgumentException
      */
-    public function testDeleteMissingCache()
+    public function testSetMissingCache()
     {
         if ($this->cache) {
             $input = [
@@ -81,10 +82,11 @@ class DeleterTransformerTest extends AbstractProcessTest
                 ],
             ];
 
-            $result = $this->processManager->execute('test.cache_deleter_transformer.delete_missing_cache', $input);
+            $result = $this->processManager->execute('test.cache_setter_task.set_missing_cache', $input);
             self::assertEquals($input, $result);
 
-            self::assertFalse($this->cache->hasItem('DeleterTransformerTest_testDeleteMissingCache'));
+            $resultCacheItem = $this->cache->getItem('SetterTaskTest_testSetMissingCache');
+            self::assertEquals($input[0], $resultCacheItem->get());
         }
     }
 
@@ -94,17 +96,12 @@ class DeleterTransformerTest extends AbstractProcessTest
     public function testTransformCacheKey()
     {
         if ($this->cache) {
-            $input = ['DeleterTransformerTest', 'testTransformCacheKey'];
+            $input = ['SetterTaskTest', 'testTransformCacheKey'];
 
-            $cacheItem = $this->cache->getItem('DeleterTransformerTest_testTransformCacheKey');
-            $cacheItem->set([]);
-            $this->cache->save($cacheItem);
+            $this->processManager->execute('test.cache_setter_task.transform_cache_key', $input);
 
-            $result = $this->processManager->execute('test.cache_deleter_transformer.transform_cache_key', $input);
-            self::assertEquals($input, $result);
-
-            self::assertFalse($this->cache->hasItem('DeleterTransformerTest_testTransformCacheKey'));
-
+            $resultCacheItem = $this->cache->getItem('SetterTaskTest_testTransformCacheKey');
+            self::assertEquals($input, $resultCacheItem->get());
         }
     }
 
@@ -114,9 +111,9 @@ class DeleterTransformerTest extends AbstractProcessTest
     public function testBadCacheKey()
     {
         if ($this->cache) {
-            $input = ['DeleterTransformerTest', 'testBadCacheKey'];
+            $input = ['SetterTransformerTest', 'testBadCacheKey'];
 
-            $result = $this->processManager->execute('test.cache_deleter_transformer.bad_cache_key', $input);
+            $result = $this->processManager->execute('test.cache_setter_task.bad_cache_key', $input);
             self::assertEquals('missing cache', $result);
         }
     }

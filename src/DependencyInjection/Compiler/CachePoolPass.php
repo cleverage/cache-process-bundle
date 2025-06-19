@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace CleverAge\CacheProcessBundle\DependencyInjection\Compiler;
+namespace CleverAge\CacheProcessBundle\src\DependencyInjection\Compiler;
 
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\ChildDefinition;

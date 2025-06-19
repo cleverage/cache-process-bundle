@@ -1,6 +1,6 @@
 services:
     CleverAge\CacheProcessBundle\Task\:
-        resource: '../../../Task/*'
+        resource: '../../src/Task/*'
         autowire: true
         public: true
         shared: false

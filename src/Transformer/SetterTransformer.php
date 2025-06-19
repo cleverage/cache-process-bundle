@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace CleverAge\CacheProcessBundle\Transformer;
+namespace CleverAge\CacheProcessBundle\src\Transformer;
 
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\OptionsResolver\Options;

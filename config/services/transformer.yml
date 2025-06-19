@@ -1,6 +1,6 @@
 services:
     CleverAge\CacheProcessBundle\Transformer\:
-        resource: '../../../Transformer/*'
+        resource: '../../src/Transformer/*'
         autowire: true
         public: false
         arguments:

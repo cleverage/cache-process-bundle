@@ -8,17 +8,14 @@
  * file that was distributed with this source code.
  */
 
-namespace CleverAge\CacheProcessBundle;
+namespace CleverAge\CacheProcessBundle\src;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-/**
- * Class CleverAgeCacheProcessBundle
- *
- * @author  Valentin Clavreul <vclavreul@clever-age.com>
- * @author  Vincent Chalnot <vchalnot@clever-age.com>
- * @author  Madeline Veyrenc <mveyrenc@clever-age.com>
- */
 class CleverAgeCacheProcessBundle extends Bundle
 {
+    public function getPath(): string
+    {
+        return \dirname(__DIR__);
+    }
 }

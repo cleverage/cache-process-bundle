@@ -22,7 +22,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "CleverAge\\CacheProcessBundle\\": ""
+            "CleverAge\\CacheProcessBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "CleverAge\\CacheProcessBundle\\Tests\\": "tests/"
         }
     },
     "require": {
