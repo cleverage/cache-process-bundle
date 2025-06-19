@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the CleverAge/CacheProcessBundle package.
+ *
+ * Copyright (c) Clever-Age
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace CleverAge\CacheProcessBundle\Adapter;
 
 use Psr\Cache\CacheItemInterface;
@@ -12,7 +21,8 @@ class Adapter implements AdapterInterface
     public function __construct(
         private readonly \Symfony\Component\Cache\Adapter\AdapterInterface $adapter,
         private readonly string $code,
-    ) {}
+    ) {
+    }
 
     public function getCode(): string
     {

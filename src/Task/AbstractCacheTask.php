@@ -1,8 +1,11 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
+
 /*
- * This file is part of the CleverAge/ProcessBundle package.
+ * This file is part of the CleverAge/CacheProcessBundle package.
  *
- * Copyright (C) 2017-2019 Clever-Age
+ * Copyright (c) Clever-Age
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -19,7 +22,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 abstract class AbstractCacheTask extends AbstractConfigurableTask
 {
-    public function __construct(protected AdapterRegistry $registry) {}
+    public function __construct(protected AdapterRegistry $registry)
+    {
+    }
 
     /**
      * @throws UndefinedOptionsException
@@ -33,8 +38,12 @@ abstract class AbstractCacheTask extends AbstractConfigurableTask
         $resolver->setAllowedTypes('key', ['string']);
     }
 
+    /**
+     * @return array<mixed>
+     */
     protected function getMergedOptions(ProcessState $state): array
     {
+        /** @var array<mixed> $options */
         $options = $this->getOptions($state);
 
         /** @var array<mixed> $input */

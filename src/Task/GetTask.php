@@ -2,12 +2,18 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the CleverAge/CacheProcessBundle package.
+ *
+ * Copyright (c) Clever-Age
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace CleverAge\CacheProcessBundle\Task;
 
 use CleverAge\ProcessBundle\Model\ProcessState;
-use Symfony\Component\OptionsResolver\Exception\AccessException;
-use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * @phpstan-type Options array{
@@ -22,14 +28,6 @@ class GetTask extends AbstractCacheTask
      */
     public function execute(ProcessState $state): void
     {
-//        /** @var Options $options */
-//        $options = $this->getOptions($state);
-//
-//        /** @var array<mixed> $input */
-//        $input = $state->getInput() ?: [];
-//
-//        /** @var Options $mergedOptions */
-//        $mergedOptions = array_merge($options, $input);
         /** @var Options $mergedOptions */
         $mergedOptions = $this->getMergedOptions($state);
 
