@@ -1,44 +1,22 @@
 CleverAge/CacheProcessBundle
 =======================
 
-See process bundle documentation
+This bundle is a part of the [CleverAge/ProcessBundle](https://github.com/cleverage/process-bundle) project.
+It provides [Cache](https://symfony.com/doc/current/components/cache.html) integration on Process bundle.
 
-## Help needed
-
-This bundle is a mess, it doesn't require the proper dependencies, it uses missing methods (transformValue), there is a
-general lack of comments and annotations and it needs to be properly migrated to PHP7.1+.
-
-Also we need to check if tests are ok.
+Compatible with [Symfony stable version and latest Long-Term Support (LTS) release](https://symfony.com/releases).
 
 ## Documentation
 
-Contains tasks and transformers to handle cache.
+For usage documentation, see:
+[docs/index.md](docs/index.md)
 
-Activation
-----------
+## Support & Contribution
 
-Activated if cache pool `cleverage_process` is defined.
+For general support and questions, please use [Github](https://github.com/cleverage/cache-process-bundle/issues).
+If you think you found a bug or you have a feature idea to propose, feel free to open an issue after looking at the [contributing](CONTRIBUTING.md) guide.
 
-Task reference
---------------
+## License
 
-* **Service**: `CleverAge\ProcessBundle\Transformer\ArrayFilterTransformer`
-* **Transformer code**: `array_filter`
-
-Accepted inputs
----------------
-
-`array` or `\Iterable`
-
-Possible outputs
-----------------
-
-`array` containing only filtered data
-
-Options
--------
-
-| Code | Type | Required | Default | Description |
-| ---- | ---- | :------: | ------- | ----------- |
-| `condition` | `array` | | `[]` | See [ConditionTrait](TODO) |
-____
+This bundle is under the MIT license.
+For the whole copyright, see the [LICENSE](LICENSE) file distributed with this source code.
