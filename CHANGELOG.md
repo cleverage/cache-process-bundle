@@ -1,3 +1,9 @@
+v1.1
+------
+
+### Changes
+* [#8](https://github.com/cleverage/cache-process-bundle/issues/8) Upgrade to Symfony 7.3 & PHP 8.4
+
 v1.0.0
 ------
 
