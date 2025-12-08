@@ -9,19 +9,14 @@
          beStrictAboutOutputDuringTests="true"
          failOnRisky="true"
          failOnWarning="true">
-
     <testsuites>
         <testsuite name="default">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
-
     <source>
         <include>
             <directory suffix=".php">src</directory>
         </include>
     </source>
-
-    <coverage>
-    </coverage>
 </phpunit>
