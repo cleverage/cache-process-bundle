@@ -23,8 +23,8 @@ $fileHeaderComment = <<<'EOF'
     EOF;
 
 return (new PhpCsFixer\Config())
+    ->setParallelConfig(PhpCsFixer\Runner\Parallel\ParallelConfigFactory::detect())
     ->setRules([
-        '@PHP71Migration' => true,
         '@PHP82Migration' => true,
         '@PHPUnit75Migration:risky' => true,
         '@Symfony' => true,
