@@ -2,7 +2,7 @@ v2.0
 ------
 
 ### Changes
-* [#10](https://github.com/cleverage/cache-process-bundle/issues/10) Add support for PHP 8.5 and Symfony 8.* Update phpunit/phpunit to version >10.0
+* [#10](https://github.com/cleverage/cache-process-bundle/issues/10) Add support for PHP 8.5 and Symfony 8.* Update phpunit/phpunit to version >10.0 Add support for cleverage/process-bundle ^5.0
 
 ### BC breaks
 * [#10](https://github.com/cleverage/cache-process-bundle/issues/10) Remove support for PHP 8.1 and Symfony 7.3
