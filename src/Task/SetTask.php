@@ -46,6 +46,7 @@ class SetTask extends AbstractCacheTask
      * @throws UndefinedOptionsException
      * @throws AccessException
      */
+    #[\Override]
     protected function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
