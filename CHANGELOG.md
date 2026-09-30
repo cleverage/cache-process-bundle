@@ -1,6 +1,9 @@
 Latest
 ------
 
+v2.1
+------
+
 ### Changes
 * [#17](https://github.com/cleverage/cache-process-bundle/issues/17) Update quality stack: use Rector `withComposerBased()` sets (removed `SYMFONY_64` / `PHPUNIT_100` sets), declare used Symfony packages and PHPUnit range in composer.json, apply quality tools fixes
 * [#19](https://github.com/cleverage/cache-process-bundle/issues/19) Add missing documentations: complete Adapter, GetTask & SetTask reference pages, configuration and custom cache tasks guides, cookbooks. Harmonize and fix existing documentation.
