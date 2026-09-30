@@ -22,11 +22,14 @@ use CleverAge\ProcessBundle\Context\ContextualOptionResolver;
 use CleverAge\ProcessBundle\Model\ProcessHistory;
 use CleverAge\ProcessBundle\Model\ProcessState;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 
 #[CoversClass(SetTask::class)]
+#[UsesClass(Adapter::class)]
+#[UsesClass(AdapterRegistry::class)]
 class SetTaskTest extends TestCase
 {
     private Adapter $adapter;
