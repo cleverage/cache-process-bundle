@@ -1,6 +1,10 @@
 Latest
 ------
 
+### Fixes
+* [#22](https://github.com/cleverage/cache-process-bundle/issues/22) Fix GetTask and SetTask: throw an explicit `\UnexpectedValueException` on a non-array input (a `\TypeError` was triggered by `array_merge()`). Update documentation, add tests.
+* [#23](https://github.com/cleverage/cache-process-bundle/issues/23) Fix GetTask and SetTask: validate the option values given by the input with the options resolver (they were used as is). Update documentation, add tests.
+
 v2.1
 ------
 
