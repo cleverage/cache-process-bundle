@@ -86,8 +86,9 @@ services:
 Notes
 -----
 
-* Codes must be unique: registering two adapters with the same code throws an `\UnexpectedValueException`
-  (`Adapter <code> is already defined`) when the registry is instantiated, i.e. the first time a cache task is used.
+* Codes must be unique: registering two adapters with the same code throws an `\UnexpectedValueException` giving the
+  ids of both services (`Adapter <code> is already defined by service "<id>", cannot register service "<id>"`) when
+  the registry is instantiated, i.e. the first time a cache task is used.
 * Using a code that is not registered throws a `CleverAge\CacheProcessBundle\Exception\MissingAdapterException`
   (`Adapter <code> is missing`) when the task is executed.
 * The cache tasks do not handle any expiration: the lifetime of the items is the default lifetime of the decorated

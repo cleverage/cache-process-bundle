@@ -1,6 +1,9 @@
 Latest
 ------
 
+### Changes
+* [#25](https://github.com/cleverage/cache-process-bundle/issues/25) Give the ids of both services in the error on duplicate adapter codes: the adapters are registered by a compiler pass of the bundle, `AdapterRegistry::addAdapter()` gets an optional `$serviceId` argument. Update documentation, add tests.
+
 v2.1
 ------
 
