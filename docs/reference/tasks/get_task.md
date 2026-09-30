@@ -12,10 +12,11 @@ Task reference
 Accepted inputs
 ---------------
 
-`array` or empty (`null`): if the input is not empty, it is merged over the resolved options (`array_merge`), so
-input keys `adapter` and `key` override the options of the same name. Other input keys are ignored.
+`array` or empty (`null`): if the input is not empty, its keys `adapter` and `key` override the options of the same
+name, and are validated like the options (e.g. a non-string `key` throws an `InvalidOptionsException`). Other input
+keys are ignored.
 
-Any other non-empty input (e.g. a `string`) triggers a `\TypeError`.
+Any other non-empty input (e.g. a `string`) throws an `\UnexpectedValueException`.
 
 Possible outputs
 ----------------
@@ -85,7 +86,6 @@ Notes
 
 * `adapter` and `key` are required at configuration level, even when they are always given by the input: set them to
   a placeholder value (e.g. `key: ''`).
-* The values coming from the input are not validated by the options resolver.
 * A missing key and an item stored with a `null` value both output `null`. Chain a
   [SkipEmptyTask](https://github.com/cleverage/process-bundle/blob/main/docs/reference/tasks/skip_empty_task.md) to
   stop the branch when nothing is found.
