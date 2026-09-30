@@ -2,6 +2,7 @@ Latest
 ------
 
 ### Changes
+* [#20](https://github.com/cleverage/cache-process-bundle/issues/20) Add missing tests: GetTask and SetTask (options validation at initialization, context, missing adapter, stored `null`, overwriting), custom tasks extending AbstractCacheTask, Adapter, bundle and DI extension.
 * [#25](https://github.com/cleverage/cache-process-bundle/issues/25) Give the ids of both services in the error on duplicate adapter codes: the adapters are registered by a compiler pass of the bundle, `AdapterRegistry::addAdapter()` gets an optional `$serviceId` argument. Update documentation, add tests.
 
 ### Fixes

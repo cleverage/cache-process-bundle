@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace CleverAge\CacheProcessBundle\Tests\Task;
 
 use CleverAge\CacheProcessBundle\Adapter\Adapter;
+use CleverAge\CacheProcessBundle\Exception\MissingAdapterException;
 use CleverAge\CacheProcessBundle\Registry\AdapterRegistry;
 use CleverAge\CacheProcessBundle\Task\GetTask;
 use CleverAge\ProcessBundle\Configuration\ProcessConfiguration;
@@ -26,10 +27,13 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
+use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
+use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
 
 #[CoversClass(GetTask::class)]
 #[UsesClass(Adapter::class)]
 #[UsesClass(AdapterRegistry::class)]
+#[UsesClass(MissingAdapterException::class)]
 class GetTaskTest extends TestCase
 {
     private Adapter $adapter;
@@ -81,17 +85,76 @@ class GetTaskTest extends TestCase
         $this->execute($task, $state, ['key' => 1]);
     }
 
+    public function testGetStoredNullValue(): void
+    {
+        $this->adapter->save($this->adapter->getItem('null')->set(null));
+        [$task, $state] = $this->createTask(['adapter' => 'memory', 'key' => 'null']);
+
+        self::assertNull($this->execute($task, $state, null));
+    }
+
+    public function testKeyFromContext(): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'memory', 'key' => '{{ sku }}'], ['sku' => 'key2']);
+
+        self::assertSame('value2', $this->execute($task, $state, null));
+    }
+
+    public function testEmptyArrayInputUsesOptions(): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'memory', 'key' => 'key1']);
+
+        self::assertSame('value1', $this->execute($task, $state, []));
+    }
+
+    public function testInputOverridesAdapter(): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'other', 'key' => 'key1']);
+
+        self::assertSame('value1', $this->execute($task, $state, ['adapter' => 'memory']));
+    }
+
+    public function testMissingAdapter(): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'missing', 'key' => 'key1']);
+
+        $this->expectException(MissingAdapterException::class);
+        $this->expectExceptionMessage('Adapter missing is missing');
+        $this->execute($task, $state, null);
+    }
+
+    public function testRequiredOptionsAtInitialization(): void
+    {
+        $this->expectException(MissingOptionsException::class);
+        $this->expectExceptionMessage('The required option "key" is missing.');
+        $this->createTask(['adapter' => 'memory']);
+    }
+
+    public function testUndefinedOptionAtInitialization(): void
+    {
+        $this->expectException(UndefinedOptionsException::class);
+        $this->createTask(['adapter' => 'memory', 'key' => 'key1', 'value' => 'value1']);
+    }
+
+    public function testInvalidOptionTypeAtInitialization(): void
+    {
+        $this->expectException(InvalidOptionsException::class);
+        $this->expectExceptionMessage('The option "adapter" with value 1 is expected to be of type "string", but is of type "int".');
+        $this->createTask(['adapter' => 1, 'key' => 'key1']);
+    }
+
     /**
      * @param array<string, mixed> $options
+     * @param array<string, mixed> $context
      *
      * @return array{GetTask, ProcessState}
      */
-    private function createTask(array $options): array
+    private function createTask(array $options, array $context = []): array
     {
         $processConfiguration = new ProcessConfiguration('test', []);
         $state = new ProcessState($processConfiguration, new ProcessHistory($processConfiguration));
         $state->setContextualOptionResolver(new ContextualOptionResolver());
-        $state->setContext([]);
+        $state->setContext($context);
         $state->setTaskConfiguration(new TaskConfiguration('get', GetTask::class, $options));
 
         $registry = new AdapterRegistry();
