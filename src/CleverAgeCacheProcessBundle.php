@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace CleverAge\CacheProcessBundle;
 
-use CleverAge\ProcessBundle\DependencyInjection\Compiler\RegistryCompilerPass;
+use CleverAge\CacheProcessBundle\DependencyInjection\Compiler\RegisterAdaptersPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -24,13 +24,7 @@ class CleverAgeCacheProcessBundle extends Bundle
      */
     public function build(ContainerBuilder $container): void
     {
-        $container->addCompilerPass(
-            new RegistryCompilerPass(
-                'cleverage_cache_process.registry.adapter',
-                'cleverage.cache.adapter',
-                'addAdapter'
-            )
-        );
+        $container->addCompilerPass(new RegisterAdaptersPass());
     }
 
     #[\Override]

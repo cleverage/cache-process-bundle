@@ -24,12 +24,25 @@ class AdapterRegistry
     /** @var AdapterInterface[] */
     private array $adapters = [];
 
-    public function addAdapter(AdapterInterface $adapter): void
+    /** @var array<string, string|null> Service ids of the adapters, indexed by code */
+    private array $serviceIds = [];
+
+    /**
+     * @param string|null $serviceId Id of the adapter service, used to identify the adapters with the same code
+     */
+    public function addAdapter(AdapterInterface $adapter, ?string $serviceId = null): void
     {
-        if (\array_key_exists($adapter->getCode(), $this->adapters)) {
-            throw new \UnexpectedValueException("Adapter {$adapter->getCode()} is already defined");
+        $code = $adapter->getCode();
+        if (\array_key_exists($code, $this->adapters)) {
+            $message = "Adapter {$code} is already defined";
+            if (null !== $this->serviceIds[$code] && null !== $serviceId) {
+                $message .= " by service \"{$this->serviceIds[$code]}\", cannot register service \"{$serviceId}\"";
+            }
+
+            throw new \UnexpectedValueException($message);
         }
-        $this->adapters[$adapter->getCode()] = $adapter;
+        $this->adapters[$code] = $adapter;
+        $this->serviceIds[$code] = $serviceId;
     }
 
     /**
