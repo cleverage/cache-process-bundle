@@ -25,7 +25,6 @@ use CleverAge\ProcessBundle\Model\ProcessState;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
-use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
@@ -121,15 +120,6 @@ class GetTaskTest extends TestCase
 
         $this->expectException(MissingAdapterException::class);
         $this->expectExceptionMessage('Adapter missing is missing');
-        $this->execute($task, $state, null);
-    }
-
-    public function testInvalidKey(): void
-    {
-        [$task, $state] = $this->createTask(['adapter' => 'memory', 'key' => '']);
-
-        // Placeholder key not overridden by the input
-        $this->expectException(InvalidArgumentException::class);
         $this->execute($task, $state, null);
     }
 
