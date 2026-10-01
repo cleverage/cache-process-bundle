@@ -89,7 +89,8 @@ Notes
 
 * `adapter`, `key` and `value` are required at configuration level, even when they are always given by the input:
   set them to a placeholder value (e.g. `key: ''`, `value: ~`). If the input does not override the placeholder key,
-  the empty key throws a `Psr\Cache\InvalidArgumentException`.
+  the empty key is rejected only when assertions are enabled (see [Adapter](../adapter.md#notes)): in production, every
+  item is stored under the same empty key.
 * No expiration is set on the item: its lifetime is the default lifetime of the adapter (see
   [Adapter](../adapter.md#notes)).
 * The item is saved immediately (`save()`, not `saveDeferred()`), an existing item with the same key is overwritten.

@@ -85,7 +85,9 @@ Notes
 -----
 
 * `adapter` and `key` are required at configuration level, even when they are always given by the input: set them to
-  a placeholder value (e.g. `key: ''`).
+  a placeholder value (e.g. `key: ''`). If the input does not override the placeholder key, the empty key is rejected
+  only when assertions are enabled (see [Adapter](../adapter.md#notes)): in production, the item stored under the
+  empty key is read.
 * A missing key and an item stored with a `null` value both output `null`. Chain a
   [SkipEmptyTask](https://github.com/cleverage/process-bundle/blob/main/docs/reference/tasks/skip_empty_task.md) to
   stop the branch when nothing is found.
