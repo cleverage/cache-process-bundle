@@ -93,6 +93,8 @@ Notes
   (`Adapter <code> is missing`) when the task is executed.
 * The cache tasks do not handle any expiration: the lifetime of the items is the default lifetime of the decorated
   pool (`default_lifetime` of a FrameworkBundle pool, `$defaultLifetime` constructor argument of Symfony adapters).
-* Cache keys must follow the PSR-6 rules: an empty key, or a key containing one of the reserved characters
-  `{}()/\@:`, throws a `Psr\Cache\InvalidArgumentException`.
+* Cache keys must follow the PSR-6 rules: no empty key, and none of the reserved characters `{}()/\@:`. The keys are
+  validated by the decorated pool, and Symfony adapters only validate them with `assert()`: an invalid key throws a
+  `Psr\Cache\InvalidArgumentException` when assertions are enabled (`zend.assertions=1`, usual in development), but is
+  silently accepted when they are not (`zend.assertions=-1`, production `php.ini`).
 * Only the PSR-6 methods are forwarded by the base class: tag-aware features of the decorated pool are not exposed.
