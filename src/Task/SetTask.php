@@ -22,7 +22,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * @phpstan-type Options array{
  *      adapter: string,
  *      key: string,
- *      value: mixed
+ *      value: mixed,
+ *      expires_after: int|null
  * }
  */
 class SetTask extends AbstractCacheTask
@@ -38,6 +39,9 @@ class SetTask extends AbstractCacheTask
         $cache = $this->registry->getAdapter($mergedOptions['adapter']);
 
         $item = $cache->getItem($mergedOptions['key'])->set($mergedOptions['value']);
+        if (null !== $mergedOptions['expires_after']) {
+            $item->expiresAfter($mergedOptions['expires_after']);
+        }
 
         $cache->save($item);
     }
@@ -51,6 +55,16 @@ class SetTask extends AbstractCacheTask
     {
         parent::configureOptions($resolver);
 
-        $resolver->setRequired(['value']);
+        $resolver->setDefined(['value']);
+
+        $resolver->setDefault('expires_after', null);
+        $resolver->setAllowedTypes('expires_after', ['null', 'int']);
+        $resolver->setAllowedValues('expires_after', static fn (?int $value): bool => null === $value || $value > 0);
+    }
+
+    #[\Override]
+    protected function getRequiredOptions(): array
+    {
+        return [...parent::getRequiredOptions(), 'value'];
     }
 }

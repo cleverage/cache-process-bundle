@@ -23,9 +23,14 @@ use CleverAge\ProcessBundle\Context\ContextualOptionResolver;
 use CleverAge\ProcessBundle\Model\ProcessHistory;
 use CleverAge\ProcessBundle\Model\ProcessState;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
+use Psr\Cache\CacheItemInterface;
+use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\Cache\Adapter\AdapterInterface as SymfonyAdapterInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
 use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
@@ -38,9 +43,28 @@ class SetTaskTest extends TestCase
 {
     private Adapter $adapter;
 
+    private ?CacheItemInterface $savedItem = null;
+
     protected function setUp(): void
     {
-        $this->adapter = new Adapter(new ArrayAdapter(), 'memory');
+        // Keep the last saved item, to check its expiry
+        $onSave = function (CacheItemInterface $item): void {
+            $this->savedItem = $item;
+        };
+        $this->adapter = new class(new ArrayAdapter(), 'memory', $onSave) extends Adapter {
+            public function __construct(SymfonyAdapterInterface $adapter, string $code, private readonly \Closure $onSave)
+            {
+                parent::__construct($adapter, $code);
+            }
+
+            #[\Override]
+            public function save(CacheItemInterface $item): bool
+            {
+                ($this->onSave)($item);
+
+                return parent::save($item);
+            }
+        };
     }
 
     public function testSetValue(): void
@@ -128,17 +152,97 @@ class SetTaskTest extends TestCase
         $this->execute($task, $state, null);
     }
 
-    public function testRequiredOptionsAtInitialization(): void
+    public function testOptionsFromInputOnly(): void
     {
+        [$task, $state] = $this->createTask([]);
+
+        $this->execute($task, $state, ['adapter' => 'memory', 'key' => 'key1', 'value' => 'value1']);
+
+        self::assertSame('value1', $this->adapter->getItem('key1')->get());
+    }
+
+    public function testRequiredOptionsOnExecution(): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'memory']);
+
         $this->expectException(MissingOptionsException::class);
         $this->expectExceptionMessage('The required option "value" is missing.');
-        $this->createTask(['adapter' => 'memory', 'key' => 'key1']);
+        $this->execute($task, $state, ['key' => 'key1']);
+    }
+
+    /**
+     * Rejected by the task, also when assertions are disabled (Symfony adapters only validate the keys with assert()).
+     */
+    public function testInvalidKey(): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'memory', 'key' => '']);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->execute($task, $state, ['value' => 'value1']);
+    }
+
+    public function testExpiresAfter(): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'memory', 'key' => 'key1', 'value' => 'value1', 'expires_after' => 60]);
+
+        $this->execute($task, $state, null);
+
+        self::assertEqualsWithDelta(time() + 60, $this->getSavedExpiry(), 2);
+    }
+
+    public function testExpiresAfterFromInput(): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'memory', 'value' => 'value1']);
+
+        $this->execute($task, $state, ['key' => 'key1', 'expires_after' => 3600]);
+
+        self::assertEqualsWithDelta(time() + 3600, $this->getSavedExpiry(), 2);
+    }
+
+    public function testNoExpirationByDefault(): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'memory', 'key' => 'key1', 'value' => 'value1']);
+
+        $this->execute($task, $state, null);
+
+        // Default lifetime of the adapter
+        self::assertNull($this->getSavedExpiry());
+    }
+
+    /**
+     * @return iterable<string, array{mixed}>
+     */
+    public static function provideInvalidExpiresAfter(): iterable
+    {
+        yield 'zero' => [0];
+        yield 'negative' => [-60];
+        yield 'string' => ['60'];
+    }
+
+    #[DataProvider('provideInvalidExpiresAfter')]
+    public function testInvalidExpiresAfterAtInitialization(mixed $expiresAfter): void
+    {
+        $this->expectException(InvalidOptionsException::class);
+        $this->createTask(['adapter' => 'memory', 'key' => 'key1', 'value' => 'value1', 'expires_after' => $expiresAfter]);
     }
 
     public function testUndefinedOptionAtInitialization(): void
     {
         $this->expectException(UndefinedOptionsException::class);
         $this->createTask(['adapter' => 'memory', 'key' => 'key1', 'value' => 'value1', 'ttl' => 60]);
+    }
+
+    /**
+     * Expiry timestamp of the last item saved by the task (the PSR-6 items do not expose it).
+     */
+    private function getSavedExpiry(): float|int|null
+    {
+        self::assertInstanceOf(CacheItem::class, $this->savedItem);
+
+        /** @var float|int|null $expiry */
+        $expiry = (new \ReflectionProperty(CacheItem::class, 'expiry'))->getValue($this->savedItem);
+
+        return $expiry;
     }
 
     /**

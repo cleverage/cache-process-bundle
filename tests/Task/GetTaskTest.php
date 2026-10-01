@@ -23,8 +23,10 @@ use CleverAge\ProcessBundle\Context\ContextualOptionResolver;
 use CleverAge\ProcessBundle\Model\ProcessHistory;
 use CleverAge\ProcessBundle\Model\ProcessState;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
+use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
@@ -123,11 +125,92 @@ class GetTaskTest extends TestCase
         $this->execute($task, $state, null);
     }
 
-    public function testRequiredOptionsAtInitialization(): void
+    public function testOptionsFromInputOnly(): void
     {
+        [$task, $state] = $this->createTask([]);
+
+        self::assertSame('value1', $this->execute($task, $state, ['adapter' => 'memory', 'key' => 'key1']));
+    }
+
+    public function testRequiredOptionsOnExecution(): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'memory']);
+
         $this->expectException(MissingOptionsException::class);
         $this->expectExceptionMessage('The required option "key" is missing.');
-        $this->createTask(['adapter' => 'memory']);
+        $this->execute($task, $state, ['sku' => 'ABC-001']);
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function provideInvalidKeys(): iterable
+    {
+        yield 'empty' => [''];
+        yield 'reserved character' => ['a/b'];
+    }
+
+    /**
+     * Rejected by the task, also when assertions are disabled (Symfony adapters only validate the keys with assert()).
+     */
+    #[DataProvider('provideInvalidKeys')]
+    public function testInvalidKey(string $key): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'memory', 'key' => $key]);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->execute($task, $state, null);
+    }
+
+    public function testOnMissSkip(): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'memory', 'on_miss' => 'skip']);
+
+        $this->execute($task, $state, ['key' => 'missing', 'sku' => 'ABC-001']);
+
+        self::assertTrue($state->isSkipped());
+        self::assertTrue($state->hasErrorOutput());
+        self::assertSame(['key' => 'missing', 'sku' => 'ABC-001'], $state->getErrorOutput());
+        self::assertNull($state->getOutput());
+    }
+
+    public function testOnMissSkipWithHit(): void
+    {
+        $this->adapter->save($this->adapter->getItem('null')->set(null));
+        [$task, $state] = $this->createTask(['adapter' => 'memory', 'on_miss' => 'skip']);
+
+        self::assertSame('value1', $this->execute($task, $state, ['key' => 'key1']));
+        self::assertFalse($state->isSkipped());
+        self::assertFalse($state->hasErrorOutput());
+
+        // A stored null value is a hit
+        self::assertNull($this->execute($task, $state, ['key' => 'null']));
+        self::assertFalse($state->isSkipped());
+        self::assertFalse($state->hasErrorOutput());
+    }
+
+    public function testOnMissFail(): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'memory', 'key' => 'missing', 'on_miss' => 'fail']);
+
+        $this->expectException(\UnexpectedValueException::class);
+        $this->expectExceptionMessage('Cache item missing is missing from adapter memory');
+        $this->execute($task, $state, null);
+    }
+
+    public function testOnMissOutputNullByDefault(): void
+    {
+        [$task, $state] = $this->createTask(['adapter' => 'memory', 'key' => 'missing']);
+
+        self::assertNull($this->execute($task, $state, null));
+        self::assertFalse($state->isSkipped());
+        self::assertFalse($state->hasErrorOutput());
+    }
+
+    public function testInvalidOnMissAtInitialization(): void
+    {
+        $this->expectException(InvalidOptionsException::class);
+        $this->createTask(['adapter' => 'memory', 'key' => 'key1', 'on_miss' => 'ignore']);
     }
 
     public function testUndefinedOptionAtInitialization(): void

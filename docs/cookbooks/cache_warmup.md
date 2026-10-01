@@ -63,9 +63,7 @@ clever_age_process:
                     service: '@CleverAge\CacheProcessBundle\Task\SetTask'
                     error_strategy: skip # A sku which is not a valid cache key is logged and skipped
                     options:
-                        adapter: 'catalog'
-                        key: '' # Overridden by the input
-                        value: ~ # Overridden by the input
+                        adapter: 'catalog' # The key and the value are given by the input
 
                 count_rows:
                     service: '@CleverAge\ProcessBundle\Task\Reporting\StatCounterTask'
@@ -79,10 +77,7 @@ clever_age_process:
                     options:
                         adapter: 'catalog'
                         key: '{{ sku }}'
-                    outputs: [skip_missing]
-
-                skip_missing:
-                    service: '@CleverAge\ProcessBundle\Task\SkipEmptyTask'
+                        on_miss: skip
                     outputs: [log]
 
                 log:
@@ -101,18 +96,17 @@ How it works:
   builds a `key` / `value` array with the
   [mapping](https://github.com/cleverage/process-bundle/blob/main/docs/reference/transformers/mapping_transformer.md)
   transformer (`code: '.'` maps the whole line).
-- [SetTask](../reference/tasks/set_task.md) merges this array over its options: `key` and `value` placeholders are
-  replaced by the values of the current line, which is stored in the `catalog` adapter. With `error_strategy: skip`,
+- [SetTask](../reference/tasks/set_task.md) merges this array over its options: the `key` and `value` of the current
+  line complete the configured `adapter`, and the line is stored in the `catalog` adapter. With `error_strategy: skip`,
   a `sku` containing a PSR-6 reserved character (`{}()/\@:`) is logged and the next line is processed.
 - [StatCounterTask](https://github.com/cleverage/process-bundle/blob/main/docs/reference/tasks/stat_counter_task.md)
   logs the number of stored lines at the end of the process.
 - In the second process, [GetTask](../reference/tasks/get_task.md) reads the key given by the `sku` context value
   (see [contextual values](https://github.com/cleverage/process-bundle/blob/main/docs/01-quick_start.md#contextual-values)).
   Since the pool is persistent, the lines stored by the first process are available until they expire.
-- A missing key outputs `null`:
-  [SkipEmptyTask](https://github.com/cleverage/process-bundle/blob/main/docs/reference/tasks/skip_empty_task.md) stops
-  the branch, so the [LoggerTask](https://github.com/cleverage/process-bundle/blob/main/docs/reference/tasks/logger_task.md)
-  only logs found lines.
+- With `on_miss: skip`, a missing key stops the branch, so the
+  [LoggerTask](https://github.com/cleverage/process-bundle/blob/main/docs/reference/tasks/logger_task.md) only logs
+  found lines.
 
-Note that the items expire after the `default_lifetime` of the pool: schedule the warm up process more often than
-this lifetime if the other processes must always find the data.
+Note that the items expire after the `default_lifetime` of the pool (or the `expires_after` option of SetTask):
+schedule the warm up process more often than this lifetime if the other processes must always find the data.

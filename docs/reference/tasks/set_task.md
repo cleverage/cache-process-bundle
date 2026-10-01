@@ -26,11 +26,15 @@ Possible outputs
 Options
 -------
 
-| Code      | Type     | Required | Default | Description                                                                                |
-|-----------|----------|:--------:|---------|--------------------------------------------------------------------------------------------|
-| `adapter` | `string` |  **X**   |         | Code of the [adapter](../adapter.md) to write to (see `AdapterInterface::getCode()`)       |
-| `key`     | `string` |  **X**   |         | Key of the cache item to store, must be a valid PSR-6 key (can be overridden by the input) |
-| `value`   | `mixed`  |  **X**   |         | Value to store, must be serializable by the adapter (can be overridden by the input)       |
+| Code            | Type          | Required | Default | Description                                                                                  |
+|-----------------|---------------|:--------:|---------|----------------------------------------------------------------------------------------------|
+| `adapter`       | `string`      |  **X**   |         | Code of the [adapter](../adapter.md) to write to (see `AdapterInterface::getCode()`)         |
+| `key`           | `string`      |  **X**   |         | Key of the cache item to store, must be a valid PSR-6 key                                    |
+| `value`         | `mixed`       |  **X**   |         | Value to store (can be `null`), must be serializable by the adapter                          |
+| `expires_after` | `int`, `null` |          | `null`  | Lifetime of the item in seconds (strictly positive), `null` for the default adapter lifetime |
+
+Every option can be given by the configuration or by the input: `adapter`, `key` and `value` are required once merged
+with the input, an option given by neither throws a `MissingOptionsException` on execution.
 
 Examples
 --------
@@ -79,18 +83,26 @@ format:
 set:
   service: '@CleverAge\CacheProcessBundle\Task\SetTask'
   options:
-    adapter: 'memory'
-    key: '' # Overridden by the input
-    value: ~ # Overridden by the input
+    adapter: 'memory' # The key and the value are given by the input
+```
+
+* Store an item for one hour
+
+```yaml
+# Task configuration level
+set:
+  service: '@CleverAge\CacheProcessBundle\Task\SetTask'
+  options:
+    adapter: 'catalog'
+    expires_after: 3600
 ```
 
 Notes
 -----
 
-* `adapter`, `key` and `value` are required at configuration level, even when they are always given by the input:
-  set them to a placeholder value (e.g. `key: ''`, `value: ~`). If the input does not override the placeholder key,
-  the empty key is rejected only when assertions are enabled (see [Adapter](../adapter.md#notes)): in production, every
-  item is stored under the same empty key.
-* No expiration is set on the item: its lifetime is the default lifetime of the adapter (see
-  [Adapter](../adapter.md#notes)).
+* The key is validated by the task (`CacheItem::validateKey()`): an empty key, or a key containing one of the PSR-6
+  reserved characters `{}()/\@:`, throws a `Psr\Cache\InvalidArgumentException`, whatever the adapter and the
+  `zend.assertions` setting (see [Adapter](../adapter.md#notes)).
+* Without `expires_after`, the lifetime of the item is the default lifetime of the adapter (see
+  [Adapter](../adapter.md#notes)). Give `expires_after` in the input to set a lifetime per item.
 * The item is saved immediately (`save()`, not `saveDeferred()`), an existing item with the same key is overwritten.
