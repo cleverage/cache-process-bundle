@@ -16,6 +16,8 @@ namespace CleverAge\CacheProcessBundle\Task;
 use CleverAge\CacheProcessBundle\Registry\AdapterRegistry;
 use CleverAge\ProcessBundle\Model\AbstractConfigurableTask;
 use CleverAge\ProcessBundle\Model\ProcessState;
+use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\Cache\CacheItem;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\Exception\ExceptionInterface;
 use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
@@ -33,10 +35,21 @@ abstract class AbstractCacheTask extends AbstractConfigurableTask
      */
     protected function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setRequired(['adapter', 'key']);
+        // Can be given by the input only: required once merged with the input (see getRequiredOptions())
+        $resolver->setDefined(['adapter', 'key']);
 
         $resolver->setAllowedTypes('adapter', ['string']);
         $resolver->setAllowedTypes('key', ['string']);
+    }
+
+    /**
+     * Options required once merged with the input, they can be given by the configuration or by the input.
+     *
+     * @return list<string>
+     */
+    protected function getRequiredOptions(): array
+    {
+        return ['adapter', 'key'];
     }
 
     /**
@@ -45,6 +58,7 @@ abstract class AbstractCacheTask extends AbstractConfigurableTask
      * @return array<mixed>
      *
      * @throws ExceptionInterface
+     * @throws InvalidArgumentException
      */
     protected function getMergedOptions(ProcessState $state): array
     {
@@ -58,7 +72,15 @@ abstract class AbstractCacheTask extends AbstractConfigurableTask
 
         $resolver = new OptionsResolver();
         $this->configureOptions($resolver);
+        $resolver->setRequired($this->getRequiredOptions());
 
-        return $resolver->resolve(array_merge($options, array_intersect_key($input, array_flip($resolver->getDefinedOptions()))));
+        $mergedOptions = $resolver->resolve(array_merge($options, array_intersect_key($input, array_flip($resolver->getDefinedOptions()))));
+
+        // Symfony adapters only validate the keys with assert(): validate it in any environment
+        /** @var string $key */
+        $key = $mergedOptions['key'];
+        CacheItem::validateKey($key);
+
+        return $mergedOptions;
     }
 }

@@ -91,10 +91,12 @@ Notes
   the registry is instantiated, i.e. the first time a cache task is used.
 * Using a code that is not registered throws a `CleverAge\CacheProcessBundle\Exception\MissingAdapterException`
   (`Adapter <code> is missing`) when the task is executed.
-* The cache tasks do not handle any expiration: the lifetime of the items is the default lifetime of the decorated
-  pool (`default_lifetime` of a FrameworkBundle pool, `$defaultLifetime` constructor argument of Symfony adapters).
+* The lifetime of the items is the default lifetime of the decorated pool (`default_lifetime` of a FrameworkBundle
+  pool, `$defaultLifetime` constructor argument of Symfony adapters), unless the `expires_after` option of
+  [SetTask](tasks/set_task.md) is set.
 * Cache keys must follow the PSR-6 rules: no empty key, and none of the reserved characters `{}()/\@:`. The keys are
   validated by the decorated pool, and Symfony adapters only validate them with `assert()`: an invalid key throws a
   `Psr\Cache\InvalidArgumentException` when assertions are enabled (`zend.assertions=1`, usual in development), but is
-  silently accepted when they are not (`zend.assertions=-1`, production `php.ini`).
+  silently accepted when they are not (`zend.assertions=-1`, production `php.ini`). The cache tasks validate the key
+  themselves, so an invalid key always throws when using them.
 * Only the PSR-6 methods are forwarded by the base class: tag-aware features of the decorated pool are not exposed.

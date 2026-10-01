@@ -2,6 +2,9 @@ Latest
 ------
 
 ### Changes
+* [#30](https://github.com/cleverage/cache-process-bundle/issues/30) GetTask and SetTask: `adapter`, `key` and `value` are no longer required at configuration level (no placeholders needed), only once merged with the input; the key is validated by the task, so an invalid key always throws (Symfony adapters only validate keys with `assert()`). New `AbstractCacheTask::getRequiredOptions()`. Update documentation, add tests.
+* [#31](https://github.com/cleverage/cache-process-bundle/issues/31) GetTask: add an `on_miss` option (`output_null` by default, `skip` to send the input to the error outputs, `fail`) to handle cache misses. Update documentation, add tests.
+* [#32](https://github.com/cleverage/cache-process-bundle/issues/32) SetTask: add an `expires_after` option, to set the lifetime of the items. Update documentation, add tests.
 * [#20](https://github.com/cleverage/cache-process-bundle/issues/20) Add missing tests: GetTask and SetTask (options validation at initialization, context, missing adapter, stored `null`, overwriting), custom tasks extending AbstractCacheTask, Adapter, bundle and DI extension.
 * [#25](https://github.com/cleverage/cache-process-bundle/issues/25) Give the ids of both services in the error on duplicate adapter codes: the adapters are registered by a compiler pass of the bundle, `AdapterRegistry::addAdapter()` gets an optional `$serviceId` argument. Update documentation, add tests.
 

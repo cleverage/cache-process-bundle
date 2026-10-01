@@ -41,8 +41,9 @@ services:
 `CleverAge\CacheProcessBundle\Task\AbstractCacheTask` can be extended to implement other cache operations. It extends
 [AbstractConfigurableTask](https://github.com/cleverage/process-bundle/blob/main/docs/03-custom_tasks.md), requires
 the `cleverage_cache_process.registry.adapter` service (`AdapterRegistry`) as constructor argument, defines the
-required `adapter` and `key` string options, and provides `getMergedOptions()` (options merged with the array input,
-resolved again so that the input values are validated) and `$this->registry->getAdapter($code)`.
+`adapter` and `key` string options (required once merged with the input, see `getRequiredOptions()`), and provides
+`getMergedOptions()` (options merged with the array input, resolved again so that the input values are validated, and
+key validated) and `$this->registry->getAdapter($code)`.
 
 ```php
 <?php
