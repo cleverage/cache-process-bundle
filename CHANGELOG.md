@@ -2,6 +2,7 @@ Latest
 ------
 
 ### Changes
+* [#39](https://github.com/cleverage/cache-process-bundle/issues/39) Add a `.gitattributes`: the development files (`.docker/`, `.github/`, `tests/`, quality tools and PHPUnit configurations, `Makefile`) are no longer part of the archive installed by Composer (`dist`).
 * [#37](https://github.com/cleverage/cache-process-bundle/issues/37) Require `psr/cache`, used directly by `Adapter` and `AbstractCacheTask` but only installed through `symfony/cache` and `cleverage/process-bundle`.
 
 v2.2
