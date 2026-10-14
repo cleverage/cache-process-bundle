@@ -1,6 +1,9 @@
 Latest
 ------
 
+### Changes
+* [#37](https://github.com/cleverage/cache-process-bundle/issues/37) Require `psr/cache`, used directly by `Adapter` and `AbstractCacheTask` but only installed through `symfony/cache` and `cleverage/process-bundle`.
+
 v2.2
 ------
 
