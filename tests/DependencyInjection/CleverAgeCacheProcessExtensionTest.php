@@ -19,11 +19,13 @@ use CleverAge\CacheProcessBundle\Task\GetTask;
 use CleverAge\CacheProcessBundle\Task\SetTask;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
 #[CoversClass(CleverAgeCacheProcessExtension::class)]
+#[UsesClass(AdapterRegistry::class)]
 class CleverAgeCacheProcessExtensionTest extends TestCase
 {
     public function testRegistryIsRegistered(): void
@@ -34,6 +36,24 @@ class CleverAgeCacheProcessExtensionTest extends TestCase
         $definition = $container->getDefinition('cleverage_cache_process.registry.adapter');
         self::assertSame(AdapterRegistry::class, $definition->getClass());
         self::assertTrue($definition->isShared());
+    }
+
+    public function testRegistryCanBeAutowired(): void
+    {
+        $container = new ContainerBuilder();
+        (new CleverAgeCacheProcessExtension())->load([], $container);
+
+        $alias = $container->getAlias(AdapterRegistry::class);
+        self::assertSame('cleverage_cache_process.registry.adapter', (string) $alias);
+        self::assertFalse($alias->isPublic());
+
+        // e.g. a custom cache task extending AbstractCacheTask, autowired by the application
+        $container->register('app.service', AutowiredRegistryConsumer::class)->setAutowired(true)->setPublic(true);
+        $container->compile(true);
+
+        $service = $container->get('app.service');
+        self::assertInstanceOf(AutowiredRegistryConsumer::class, $service);
+        self::assertInstanceOf(AdapterRegistry::class, $service->registry);
     }
 
     /**
@@ -74,5 +94,12 @@ class CleverAgeCacheProcessExtensionTest extends TestCase
             ['package' => 'cleverage/cache-process-bundle', 'version' => '2.3', 'message' => 'The "'.$deprecatedId.'" service alias is deprecated, use the "'.$code.'" task code or the class name of the task instead. It will be removed in 3.0.'],
             $alias->getDeprecation($deprecatedId)
         );
+    }
+}
+
+final readonly class AutowiredRegistryConsumer
+{
+    public function __construct(public AdapterRegistry $registry)
+    {
     }
 }

@@ -2,6 +2,7 @@ Latest
 ------
 
 ### Changes
+* [#49](https://github.com/cleverage/cache-process-bundle/issues/49) Add a `CleverAge\CacheProcessBundle\Registry\AdapterRegistry` alias of the `cleverage_cache_process.registry.adapter` service: the registry can be autowired, e.g. in a custom cache task extending `AbstractCacheTask`. Update documentation, add tests.
 * [#43](https://github.com/cleverage/cache-process-bundle/issues/43) Give a code to the tasks ([cleverage/process-bundle#91](https://github.com/cleverage/process-bundle/issues/91)): `cache_get` and `cache_set` (`task: cache_get`, with `cleverage/process-bundle` 5.4 or later, referencing them by `service` being deprecated there). The tasks have their class name as service id; fetching them directly from the service container is deprecated (`container.private`), they will be private in 3.0. The former ids `cleverage_cache_process.task.get` / `cleverage_cache_process.task.set` are deprecated aliases, removed in 3.0. Update documentation, add tests.
 * [#41](https://github.com/cleverage/cache-process-bundle/issues/41) CI: test the lowest versions allowed by `composer.json` (`--prefer-lowest`, PHP 8.2).
 * [#39](https://github.com/cleverage/cache-process-bundle/issues/39) Add a `.gitattributes`: the development files (`.docker/`, `.github/`, `tests/`, quality tools and PHPUnit configurations, `Makefile`) are no longer part of the archive installed by Composer (`dist`).
