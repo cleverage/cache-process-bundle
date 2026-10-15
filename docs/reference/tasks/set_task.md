@@ -8,6 +8,7 @@ Task reference
 --------------
 
 * **Service**: `CleverAge\CacheProcessBundle\Task\SetTask`
+* **Code**: `cache_set` (`task: cache_set`)
 
 Accepted inputs
 ---------------
@@ -44,7 +45,7 @@ Examples
 ```yaml
 # Task configuration level
 set:
-  service: '@CleverAge\CacheProcessBundle\Task\SetTask'
+  task: cache_set
   options:
     adapter: 'memory'
     key: 'key1'
@@ -59,7 +60,7 @@ set:
 ```yaml
 # Task configuration level
 data:
-  service: '@CleverAge\ProcessBundle\Task\ConstantIterableOutputTask'
+  task: constant_iterable_output
   options:
     output:
       - key: 'key1'
@@ -70,7 +71,7 @@ data:
         column2: value2-2
   outputs: [format]
 format:
-  service: '@CleverAge\ProcessBundle\Task\TransformerTask'
+  task: transformer
   options:
     transformers:
       mapping:
@@ -81,7 +82,7 @@ format:
             code: '.'
   outputs: [set]
 set:
-  service: '@CleverAge\CacheProcessBundle\Task\SetTask'
+  task: cache_set
   options:
     adapter: 'memory' # The key and the value are given by the input
 ```
@@ -91,7 +92,7 @@ set:
 ```yaml
 # Task configuration level
 set:
-  service: '@CleverAge\CacheProcessBundle\Task\SetTask'
+  task: cache_set
   options:
     adapter: 'catalog'
     expires_after: 3600

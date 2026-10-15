@@ -37,32 +37,42 @@ class CleverAgeCacheProcessExtensionTest extends TestCase
     }
 
     /**
-     * @return iterable<string, array{string, class-string}>
+     * @return iterable<string, array{class-string, string, string}>
      */
     public static function provideTasks(): iterable
     {
-        yield 'get' => ['cleverage_cache_process.task.get', GetTask::class];
-        yield 'set' => ['cleverage_cache_process.task.set', SetTask::class];
+        yield 'get' => [GetTask::class, 'cache_get', 'cleverage_cache_process.task.get'];
+        yield 'set' => [SetTask::class, 'cache_set', 'cleverage_cache_process.task.set'];
     }
 
     /**
      * @param class-string $class
      */
     #[DataProvider('provideTasks')]
-    public function testTaskIsRegistered(string $id, string $class): void
+    public function testTaskIsRegistered(string $class, string $code, string $deprecatedId): void
     {
         $container = new ContainerBuilder();
         (new CleverAgeCacheProcessExtension())->load([], $container);
 
-        $definition = $container->getDefinition($id);
-        self::assertSame($class, $definition->getClass());
+        // The class name is the service id
+        $definition = $container->getDefinition($class);
         // Tasks are stateful: each process execution must get its own instance
         self::assertFalse($definition->isShared());
         self::assertEquals([new Reference('cleverage_cache_process.registry.adapter')], $definition->getArguments());
+        // Referenced by its code in the process configurations (task: <code>)
+        self::assertSame([['code' => $code]], $definition->getTag('cleverage.task'));
+        // Public for the direct access from the service container, deprecated
+        self::assertTrue($definition->isPublic());
+        self::assertSame([['package' => 'cleverage/cache-process-bundle', 'version' => '2.3']], $definition->getTag('container.private'));
 
-        // Referenced as '@<class>' in process configurations
-        $alias = $container->getAlias($class);
-        self::assertSame($id, (string) $alias);
-        self::assertTrue($alias->isPublic());
+        // Former id, deprecated
+        $alias = $container->getAlias($deprecatedId);
+        self::assertSame($class, (string) $alias);
+        self::assertFalse($alias->isPublic());
+        self::assertTrue($alias->isDeprecated());
+        self::assertSame(
+            ['package' => 'cleverage/cache-process-bundle', 'version' => '2.3', 'message' => 'The "'.$deprecatedId.'" service alias is deprecated, use the "'.$code.'" task code or the class name of the task instead. It will be removed in 3.0.'],
+            $alias->getDeprecation($deprecatedId)
+        );
     }
 }
