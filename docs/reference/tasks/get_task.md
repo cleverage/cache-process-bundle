@@ -8,6 +8,7 @@ Task reference
 --------------
 
 * **Service**: `CleverAge\CacheProcessBundle\Task\GetTask`
+* **Code**: `cache_get` (`task: cache_get`)
 
 Accepted inputs
 ---------------
@@ -51,7 +52,7 @@ Examples
 ```yaml
 # Task configuration level
 get:
-  service: '@CleverAge\CacheProcessBundle\Task\GetTask'
+  task: cache_get
   options:
     adapter: 'memory'
     key: 'key2'
@@ -63,7 +64,7 @@ get:
 ```yaml
 # Task configuration level
 get:
-  service: '@CleverAge\CacheProcessBundle\Task\GetTask'
+  task: cache_get
   options:
     adapter: 'catalog'
     key: '{{ sku }}'
@@ -76,14 +77,14 @@ get:
 ```yaml
 # Task configuration level
 get:
-  service: '@CleverAge\CacheProcessBundle\Task\GetTask'
+  task: cache_get
   options:
     adapter: 'catalog'
     on_miss: skip # The input ({ key: ... }) is sent to the error outputs
   outputs: [debug]
   error_outputs: [compute]
 compute:
-  service: '@CleverAge\ProcessBundle\Task\TransformerTask'
+  task: transformer
   options:
     transformers:
       mapping:
@@ -96,7 +97,7 @@ compute:
               slugify: ~ # Any computation
   outputs: [set]
 set:
-  service: '@CleverAge\CacheProcessBundle\Task\SetTask'
+  task: cache_set
   options:
     adapter: 'catalog'
 ```
@@ -106,7 +107,7 @@ set:
 ```yaml
 # Task configuration level
 build_key:
-  service: '@CleverAge\ProcessBundle\Task\TransformerTask'
+  task: transformer
   options:
     transformers:
       mapping:
@@ -115,7 +116,7 @@ build_key:
             code: '[sku]'
   outputs: [get]
 get:
-  service: '@CleverAge\CacheProcessBundle\Task\GetTask'
+  task: cache_get
   options:
     adapter: 'catalog' # The key is given by the input
 ```

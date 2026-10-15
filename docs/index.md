@@ -26,6 +26,16 @@ The bundle has no semantic configuration. To use the cache tasks, declare at lea
 (usually `CleverAge\CacheProcessBundle\Adapter\Adapter`, wrapping any Symfony cache pool), tagged
 `cleverage.cache.adapter`. Its code is then used in the `adapter` option of the tasks.
 
+The tasks are registered as services (non-shared) and are used in your processes by their code, `cache_get` and
+`cache_set` (e.g. `task: cache_get`, requires `cleverage/process-bundle` 5.4 or later, see its
+[task definition](https://github.com/cleverage/process-bundle/blob/main/docs/reference/02-task_definition.md)).
+Referencing them by their class name (`service: '@CleverAge\CacheProcessBundle\Task\GetTask'`) is deprecated since
+`cleverage/process-bundle` 5.4.
+
+Their service id is their class name. Fetching them directly from the service container is deprecated since 2.3 (they
+will be private in 3.0); their former ids, `cleverage_cache_process.task.get` and `cleverage_cache_process.task.set`,
+are deprecated aliases since 2.3, removed in 3.0.
+
 ```yaml
 # config/services.yaml
 services:

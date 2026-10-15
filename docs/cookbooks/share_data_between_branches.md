@@ -44,11 +44,11 @@ clever_age_process:
             description: 'Store items in a first branch, then read some of them in other branches'
             tasks:
                 start:
-                    service: '@CleverAge\ProcessBundle\Task\DummyTask'
+                    task: dummy
                     outputs: [data, get, get_missing] # Branches are executed in this order
 
                 data:
-                    service: '@CleverAge\ProcessBundle\Task\ConstantIterableOutputTask'
+                    task: constant_iterable_output
                     options:
                         output:
                             - key: 'key1'
@@ -60,7 +60,7 @@ clever_age_process:
                     outputs: [format]
 
                 format:
-                    service: '@CleverAge\ProcessBundle\Task\TransformerTask'
+                    task: transformer
                     options:
                         transformers:
                             mapping:
@@ -72,26 +72,26 @@ clever_age_process:
                     outputs: [set]
 
                 set:
-                    service: '@CleverAge\CacheProcessBundle\Task\SetTask'
+                    task: cache_set
                     options:
                         adapter: 'memory' # The key and the value are given by the input
 
                 get:
-                    service: '@CleverAge\CacheProcessBundle\Task\GetTask'
+                    task: cache_get
                     options:
                         adapter: 'memory'
                         key: 'key2'
                     outputs: [debug]
 
                 get_missing:
-                    service: '@CleverAge\CacheProcessBundle\Task\GetTask'
+                    task: cache_get
                     options:
                         adapter: 'memory'
                         key: 'missing'
                     outputs: [debug]
 
                 debug:
-                    service: '@CleverAge\ProcessBundle\Task\Debug\DebugTask'
+                    task: debug
 ```
 
 How it works:

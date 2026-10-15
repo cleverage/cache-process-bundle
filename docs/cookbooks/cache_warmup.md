@@ -34,21 +34,21 @@ clever_age_process:
             description: 'Store each line of the catalog CSV file in the catalog cache, indexed by sku'
             tasks:
                 read_source:
-                    service: '@CleverAge\ProcessBundle\Task\File\Csv\CsvReaderTask'
+                    task: csv_reader
                     options:
                         file_path: '%kernel.project_dir%/var/data/catalog.csv'
                         delimiter: ';'
                     outputs: [filter_valid]
 
                 filter_valid:
-                    service: '@CleverAge\ProcessBundle\Task\FilterTask'
+                    task: filter
                     options:
                         not_empty:
                             '[sku]': ~
                     outputs: [format]
 
                 format:
-                    service: '@CleverAge\ProcessBundle\Task\TransformerTask'
+                    task: transformer
                     options:
                         transformers:
                             mapping:
@@ -60,20 +60,20 @@ clever_age_process:
                     outputs: [store, count_rows]
 
                 store:
-                    service: '@CleverAge\CacheProcessBundle\Task\SetTask'
+                    task: cache_set
                     error_strategy: skip # A sku which is not a valid cache key is logged and skipped
                     options:
                         adapter: 'catalog' # The key and the value are given by the input
 
                 count_rows:
-                    service: '@CleverAge\ProcessBundle\Task\Reporting\StatCounterTask'
+                    task: stat_counter
 
         app.catalog_cache_read:
             description: 'Read a catalog line from the catalog cache'
             help: "bin/console cleverage:process:execute app.catalog_cache_read -c sku:\"'ABC-001'\""
             tasks:
                 read:
-                    service: '@CleverAge\CacheProcessBundle\Task\GetTask'
+                    task: cache_get
                     options:
                         adapter: 'catalog'
                         key: '{{ sku }}'
@@ -81,7 +81,7 @@ clever_age_process:
                     outputs: [log]
 
                 log:
-                    service: '@CleverAge\ProcessBundle\Task\Reporting\LoggerTask'
+                    task: logger
                     options:
                         level: info
                         message: 'Catalog line found in cache'
