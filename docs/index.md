@@ -63,8 +63,10 @@ declare(strict_types=1);
 namespace App\Task;
 
 use CleverAge\CacheProcessBundle\Task\AbstractCacheTask;
+use CleverAge\ProcessBundle\Attribute\AsTask;
 use CleverAge\ProcessBundle\Model\ProcessState;
 
+#[AsTask(code: 'app_cache_delete')]
 class DeleteTask extends AbstractCacheTask
 {
     public function execute(ProcessState $state): void
@@ -77,13 +79,24 @@ class DeleteTask extends AbstractCacheTask
 }
 ```
 
+Its code is given by the `#[AsTask]` attribute (`cleverage/process-bundle` 5.4 or later), prefixed to avoid conflicts
+with the codes of the bundles. With autoconfiguration, the task is also non-shared and logs in the
+`cleverage_process_task` channel:
+
 ```yaml
 # config/services.yaml
 services:
     App\Task\DeleteTask:
-        public: true
-        shared: false
+        autoconfigure: true
         arguments: ['@cleverage_cache_process.registry.adapter']
+```
+
+```yaml
+delete_from_cache:
+    task: app_cache_delete
+    options:
+        adapter: app
+        key: my_key
 ```
 
 ## Reference
