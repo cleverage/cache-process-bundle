@@ -81,14 +81,16 @@ class DeleteTask extends AbstractCacheTask
 
 Its code is given by the `#[AsTask]` attribute (`cleverage/process-bundle` 5.4 or later), prefixed to avoid conflicts
 with the codes of the bundles. With autoconfiguration, the task is also non-shared and logs in the
-`cleverage_process_task` channel:
+`cleverage_process_task` channel. The registry is autowired by its class (since 2.3; before, pass
+`'@cleverage_cache_process.registry.adapter'` as argument), so the default `App\:` resource of a Symfony application is
+enough, or explicitly:
 
 ```yaml
 # config/services.yaml
 services:
     App\Task\DeleteTask:
+        autowire: true
         autoconfigure: true
-        arguments: ['@cleverage_cache_process.registry.adapter']
 ```
 
 ```yaml
