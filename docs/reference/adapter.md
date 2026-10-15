@@ -13,8 +13,11 @@ Adapter reference
   option of the tasks)
 * **Base class**: `CleverAge\CacheProcessBundle\Adapter\Adapter`, decorates any
   `Symfony\Component\Cache\Adapter\AdapterInterface` (every PSR-6 method is forwarded to it)
-* **Service tag**: `cleverage.cache.adapter`, every tagged service is registered in the
-  `cleverage_cache_process.registry.adapter` registry (`CleverAge\CacheProcessBundle\Registry\AdapterRegistry`)
+* **Service tag**: `cleverage.cache.adapter`, with a `code` attribute (`- { name: cleverage.cache.adapter, code: memory }`):
+  every tagged service is registered in the `cleverage_cache_process.registry.adapter` registry
+  (`CleverAge\CacheProcessBundle\Registry\AdapterRegistry`, autowirable by its class name)
+* **Attribute**: `CleverAge\CacheProcessBundle\Attribute\AsCacheAdapter` (`#[AsCacheAdapter(code: 'memory')]`, with
+  autoconfiguration), equivalent to the tag
 
 Constructor arguments
 ---------------------
@@ -56,7 +59,7 @@ services:
     app.cleverage_cache_process.adapter.memory:
         class: App\Adapter\MemoryAdapter
         tags:
-            - { name: cleverage.cache.adapter }
+            - { name: cleverage.cache.adapter, code: memory }
 ```
 
 * Persistent adapter, wrapping a cache pool of the FrameworkBundle, without any PHP class
@@ -80,15 +83,23 @@ services:
             - '@app.cache.catalog'
             - 'catalog'
         tags:
-            - { name: cleverage.cache.adapter }
+            - { name: cleverage.cache.adapter, code: catalog }
 ```
 
 Notes
 -----
 
-* Codes must be unique: registering two adapters with the same code throws an `\UnexpectedValueException` giving the
-  ids of both services (`Adapter <code> is already defined by service "<id>", cannot register service "<id>"`) when
-  the registry is instantiated, i.e. the first time a cache task is used.
+* The adapters are registered by the `code` attribute of their tag, in a service locator built when the container is
+  compiled: an adapter is only instantiated when a task uses it (an error in an adapter that a process does not use
+  does not make it fail). The `code` must be the one returned by `getCode()` (an `\UnexpectedValueException` is thrown
+  otherwise when it is fetched). Two adapters with the same code, or an empty code, fail the container compilation.
+  `AdapterRegistry::hasAdapter()` and `getAdapters()` (which instantiates every adapter) are available, e.g. in a
+  custom cache task.
+* **Deprecated**: a service tagged without `code` is still registered, with `AdapterRegistry::addAdapter()`,
+  instantiated with the registry (deprecated since 2.3, the `code` will be required in 3.0). Two adapters with the same
+  code then throw an `\UnexpectedValueException` giving the ids of both services
+  (`Adapter <code> is already defined by service "<id>", cannot register service "<id>"`) when the registry is
+  instantiated, i.e. the first time a cache task is used.
 * Using a code that is not registered throws a `CleverAge\CacheProcessBundle\Exception\MissingAdapterException`
   (`Adapter <code> is missing`) when the task is executed.
 * The lifetime of the items is the default lifetime of the decorated pool (`default_lifetime` of a FrameworkBundle

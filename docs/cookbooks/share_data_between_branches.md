@@ -32,7 +32,7 @@ services:
     app.cleverage_cache_process.adapter.memory:
         class: App\Adapter\MemoryAdapter
         tags:
-            - { name: cleverage.cache.adapter }
+            - { name: cleverage.cache.adapter, code: memory }
 ```
 
 Then define the process:

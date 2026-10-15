@@ -21,6 +21,7 @@ use CleverAge\ProcessBundle\Context\ContextualOptionResolver;
 use CleverAge\ProcessBundle\Model\ProcessHistory;
 use CleverAge\ProcessBundle\Model\ProcessState;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -29,6 +30,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * Custom cache tasks extending AbstractCacheTask get their own options from the input.
  */
 #[CoversClass(AbstractCacheTask::class)]
+#[UsesClass(AdapterRegistry::class)]
 class AbstractCacheTaskTest extends TestCase
 {
     public function testCustomOptionFromInput(): void

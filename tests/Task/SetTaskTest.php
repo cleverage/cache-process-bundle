@@ -31,6 +31,7 @@ use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\AdapterInterface as SymfonyAdapterInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\CacheItem;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
 use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
@@ -259,8 +260,8 @@ class SetTaskTest extends TestCase
         $state->setContext($context);
         $state->setTaskConfiguration(new TaskConfiguration('set', SetTask::class, $options));
 
-        $registry = new AdapterRegistry();
-        $registry->addAdapter($this->adapter);
+        $adapter = $this->adapter;
+        $registry = new AdapterRegistry(new ServiceLocator(['memory' => static fn (): Adapter => $adapter]));
         $task = new SetTask($registry);
         $task->initialize($state);
 

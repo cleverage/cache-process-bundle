@@ -13,19 +13,26 @@ declare(strict_types=1);
 
 namespace CleverAge\CacheProcessBundle\Tests\DependencyInjection;
 
+use CleverAge\CacheProcessBundle\Attribute\AsCacheAdapter;
 use CleverAge\CacheProcessBundle\DependencyInjection\CleverAgeCacheProcessExtension;
 use CleverAge\CacheProcessBundle\Registry\AdapterRegistry;
 use CleverAge\CacheProcessBundle\Task\GetTask;
 use CleverAge\CacheProcessBundle\Task\SetTask;
+use CleverAge\CacheProcessBundle\Tests\Fixtures\AttributedAdapter;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\Compiler\AttributeAutoconfigurationPass;
+use Symfony\Component\DependencyInjection\Compiler\ResolveChildDefinitionsPass;
+use Symfony\Component\DependencyInjection\Compiler\ResolveInstanceofConditionalsPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
 
 #[CoversClass(CleverAgeCacheProcessExtension::class)]
 #[UsesClass(AdapterRegistry::class)]
+#[CoversClass(AsCacheAdapter::class)]
 class CleverAgeCacheProcessExtensionTest extends TestCase
 {
     public function testRegistryIsRegistered(): void
@@ -36,6 +43,19 @@ class CleverAgeCacheProcessExtensionTest extends TestCase
         $definition = $container->getDefinition('cleverage_cache_process.registry.adapter');
         self::assertSame(AdapterRegistry::class, $definition->getClass());
         self::assertTrue($definition->isShared());
+    }
+
+    public function testAsCacheAdapterAttributeRegistersTheCode(): void
+    {
+        $container = new ContainerBuilder();
+        (new CleverAgeCacheProcessExtension())->load([], $container);
+        $container->setDefinition('app.attributed', (new Definition(AttributedAdapter::class))->setAutoconfigured(true));
+
+        (new AttributeAutoconfigurationPass())->process($container);
+        (new ResolveInstanceofConditionalsPass())->process($container);
+        (new ResolveChildDefinitionsPass())->process($container);
+
+        self::assertSame([['code' => 'app_attributed']], $container->getDefinition('app.attributed')->getTag('cleverage.cache.adapter'));
     }
 
     public function testRegistryCanBeAutowired(): void
