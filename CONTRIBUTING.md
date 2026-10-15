@@ -51,7 +51,7 @@ configured accordingly.
 ## Deprecations notices
 
 When a feature should be deprecated, or when you have a breaking change for a future version, please :
-* [Fill an issue](https://github.com/cleverage/cache-process-bundl/issues/new)
+* [Fill an issue](https://github.com/cleverage/cache-process-bundle/issues/new)
 * Add TODO comments with the following format: `@TODO deprecated v2.0`
 * Trigger a deprecation error: `@trigger_error('This feature will be deprecated in v2.0', E_USER_DEPRECATED);`
 
