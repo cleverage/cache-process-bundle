@@ -28,6 +28,7 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\DependencyInjection\ServiceLocator;
 use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Exception\MissingOptionsException;
 use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
@@ -240,8 +241,8 @@ class GetTaskTest extends TestCase
         $state->setContext($context);
         $state->setTaskConfiguration(new TaskConfiguration('get', GetTask::class, $options));
 
-        $registry = new AdapterRegistry();
-        $registry->addAdapter($this->adapter);
+        $adapter = $this->adapter;
+        $registry = new AdapterRegistry(new ServiceLocator(['memory' => static fn (): Adapter => $adapter]));
         $task = new GetTask($registry);
         $task->initialize($state);
 

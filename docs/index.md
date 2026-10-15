@@ -24,7 +24,8 @@ CleverAge\CacheProcessBundle\CleverAgeCacheProcessBundle::class => ['all' => tru
 The bundle has no semantic configuration. To use the cache tasks, declare at least one cache
 [adapter](reference/adapter.md): a service implementing `CleverAge\CacheProcessBundle\Adapter\AdapterInterface`
 (usually `CleverAge\CacheProcessBundle\Adapter\Adapter`, wrapping any Symfony cache pool), tagged
-`cleverage.cache.adapter`. Its code is then used in the `adapter` option of the tasks.
+`cleverage.cache.adapter` with its code (or with the `#[AsCacheAdapter]` attribute). This code is then used in the
+`adapter` option of the tasks.
 
 The tasks are registered as services (non-shared) and are used in your processes by their code, `cache_get` and
 `cache_set` (e.g. `task: cache_get`, requires `cleverage/process-bundle` 5.4 or later, see its
@@ -43,7 +44,7 @@ services:
         class: CleverAge\CacheProcessBundle\Adapter\Adapter
         arguments: ['@cache.app', 'app']
         tags:
-            - { name: cleverage.cache.adapter }
+            - { name: cleverage.cache.adapter, code: app }
 ```
 
 ## Custom cache tasks

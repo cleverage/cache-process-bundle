@@ -15,28 +15,57 @@ namespace CleverAge\CacheProcessBundle\Registry;
 
 use CleverAge\CacheProcessBundle\Adapter\AdapterInterface;
 use CleverAge\CacheProcessBundle\Exception\MissingAdapterException;
+use Symfony\Contracts\Service\ServiceProviderInterface;
 
 /**
- * Holds all tagged cache adapters services.
+ * Holds the cache adapters, indexed by code.
+ *
+ * The adapter services are fetched lazily from a service locator indexed by code (`code` attribute of the
+ * `cleverage.cache.adapter` tag, or `#[AsCacheAdapter]`, see RegisterAdaptersPass): an adapter is only instantiated
+ * when it is used.
  */
 class AdapterRegistry
 {
-    /** @var AdapterInterface[] */
+    /**
+     * Adapters already fetched from the locator, and the ones registered with addAdapter() (deprecated).
+     *
+     * @var array<string, AdapterInterface>
+     */
     private array $adapters = [];
 
-    /** @var array<string, string|null> Service ids of the adapters, indexed by code */
+    /** @var array<string, string|null> Service ids of the adapters registered with addAdapter(), indexed by code */
     private array $serviceIds = [];
 
     /**
+     * @param ServiceProviderInterface<mixed>|null $locator Adapter services, checked when fetched
+     */
+    public function __construct(
+        private readonly ?ServiceProviderInterface $locator = null,
+    ) {
+    }
+
+    /**
      * @param string|null $serviceId Id of the adapter service, used to identify the adapters with the same code
+     *
+     * @deprecated since 2.3, tag the adapter service with a "code" attribute or use #[AsCacheAdapter] instead
      */
     public function addAdapter(AdapterInterface $adapter, ?string $serviceId = null): void
     {
         $code = $adapter->getCode();
-        if (\array_key_exists($code, $this->adapters)) {
+        trigger_deprecation(
+            'cleverage/cache-process-bundle',
+            '2.3',
+            'Registering the cache adapter "%s" (%s) with "%s()" is deprecated, tag its service with a "code" attribute ({ name: cleverage.cache.adapter, code: %s }) or use the #[AsCacheAdapter] attribute instead, so that it is only instantiated when used. It will be required in 3.0.',
+            $code,
+            $adapter::class,
+            __METHOD__,
+            $code,
+        );
+        if ($this->hasAdapter($code)) {
             $message = "Adapter {$code} is already defined";
-            if (null !== $this->serviceIds[$code] && null !== $serviceId) {
-                $message .= " by service \"{$this->serviceIds[$code]}\", cannot register service \"{$serviceId}\"";
+            $definedBy = $this->serviceIds[$code] ?? null;
+            if (null !== $definedBy && null !== $serviceId) {
+                $message .= " by service \"{$definedBy}\", cannot register service \"{$serviceId}\"";
             }
 
             throw new \UnexpectedValueException($message);
@@ -46,14 +75,44 @@ class AdapterRegistry
     }
 
     /**
+     * Instantiates every adapter of the locator.
+     *
+     * @return array<string, AdapterInterface>
+     */
+    public function getAdapters(): array
+    {
+        foreach (array_keys($this->locator?->getProvidedServices() ?? []) as $code) {
+            $this->getAdapter((string) $code);
+        }
+
+        return $this->adapters;
+    }
+
+    /**
      * @throws MissingAdapterException
      */
     public function getAdapter(string $code): AdapterInterface
     {
-        if (!\array_key_exists($code, $this->adapters)) {
+        if (isset($this->adapters[$code])) {
+            return $this->adapters[$code];
+        }
+        if (!$this->locator?->has($code)) {
             throw new MissingAdapterException("Adapter {$code} is missing");
         }
 
-        return $this->adapters[$code];
+        $adapter = $this->locator->get($code);
+        if (!$adapter instanceof AdapterInterface) {
+            throw new \UnexpectedValueException(\sprintf('The service of the cache adapter "%s" must implement "%s".', $code, AdapterInterface::class));
+        }
+        if ($code !== $adapter->getCode()) {
+            throw new \UnexpectedValueException(\sprintf('The cache adapter "%s" is registered with the code "%s" but its getCode() method returns "%s": both must be the same.', $adapter::class, $code, $adapter->getCode()));
+        }
+
+        return $this->adapters[$code] = $adapter;
+    }
+
+    public function hasAdapter(string $code): bool
+    {
+        return isset($this->adapters[$code]) || ($this->locator?->has($code) ?? false);
     }
 }

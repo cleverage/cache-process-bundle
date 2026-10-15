@@ -22,7 +22,7 @@ services:
         class: CleverAge\CacheProcessBundle\Adapter\Adapter
         arguments: ['@app.cache.catalog', 'catalog']
         tags:
-            - { name: cleverage.cache.adapter }
+            - { name: cleverage.cache.adapter, code: catalog }
 ```
 
 Then define a process storing each line of the file, and another one reading a line by key:
