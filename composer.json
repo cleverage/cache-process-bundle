@@ -50,8 +50,10 @@
         "phpstan/phpstan": "*",
         "phpstan/phpstan-symfony": "*",
         "phpunit/phpunit": "^10.5 || ^11 || ^12 || ^13",
+        "psr/log": "^2 || ^3",
         "rector/rector": "*",
         "roave/security-advisories": "dev-latest",
+        "symfony/framework-bundle": "^6.4 || ^7.4 || ^8",
         "symfony/test-pack": "^1.1"
     },
     "config": {
