@@ -24,6 +24,8 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
  * This is the class that loads and manages your bundle configuration.
  *
  * @see https://symfony.com/doc/current/bundles/extension.html
+ *
+ * @internal
  */
 class CleverAgeCacheProcessExtension extends Extension
 {

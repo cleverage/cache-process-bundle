@@ -23,6 +23,8 @@ use Symfony\Contracts\Service\ServiceProviderInterface;
  * The adapter services are fetched lazily from a service locator indexed by code (`code` attribute of the
  * `cleverage.cache.adapter` tag, or `#[AsCacheAdapter]`, see RegisterAdaptersPass): an adapter is only instantiated
  * when it is used.
+ *
+ * @final since 2.3
  */
 class AdapterRegistry
 {

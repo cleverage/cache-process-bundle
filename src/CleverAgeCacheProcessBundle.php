@@ -17,6 +17,9 @@ use CleverAge\CacheProcessBundle\DependencyInjection\Compiler\RegisterAdaptersPa
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
+/**
+ * @final since 2.3
+ */
 class CleverAgeCacheProcessBundle extends Bundle
 {
     /**

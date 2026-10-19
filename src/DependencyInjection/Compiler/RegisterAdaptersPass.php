@@ -22,6 +22,8 @@ use Symfony\Component\DependencyInjection\Reference;
 /**
  * Registers the `cleverage.cache.adapter` tagged services in the adapter registry: in a service locator indexed by the
  * `code` attribute of the tag (lazy), or, without `code` (deprecated), with an addAdapter() call (eager).
+ *
+ * @internal
  */
 class RegisterAdaptersPass implements CompilerPassInterface
 {
