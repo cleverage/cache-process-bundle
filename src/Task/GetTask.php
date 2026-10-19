@@ -24,6 +24,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  *      key: string,
  *      on_miss: string
  * }
+ *
+ * @final since 2.3
  */
 class GetTask extends AbstractCacheTask
 {

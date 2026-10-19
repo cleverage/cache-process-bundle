@@ -25,6 +25,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  *      value: mixed,
  *      expires_after: int|null
  * }
+ *
+ * @final since 2.3
  */
 class SetTask extends AbstractCacheTask
 {
