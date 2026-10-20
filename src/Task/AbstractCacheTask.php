@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace CleverAge\CacheProcessBundle\Task;
 
+use CleverAge\CacheProcessBundle\Exception\UnexpectedValueException;
 use CleverAge\CacheProcessBundle\Registry\AdapterRegistry;
 use CleverAge\ProcessBundle\Model\AbstractConfigurableTask;
 use CleverAge\ProcessBundle\Model\ProcessState;
@@ -67,7 +68,7 @@ abstract class AbstractCacheTask extends AbstractConfigurableTask
 
         $input = $state->getInput() ?: [];
         if (!\is_array($input)) {
-            throw new \UnexpectedValueException(\sprintf('%s expects an array or null input, %s given', (new \ReflectionClass($this))->getShortName(), get_debug_type($input)));
+            throw new UnexpectedValueException(\sprintf('%s expects an array or null input, %s given', (new \ReflectionClass($this))->getShortName(), get_debug_type($input)));
         }
 
         $resolver = new OptionsResolver();

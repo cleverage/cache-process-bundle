@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace CleverAge\CacheProcessBundle\Task;
 
+use CleverAge\CacheProcessBundle\Exception\UnexpectedValueException;
 use CleverAge\ProcessBundle\Model\ProcessState;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\Exception\UndefinedOptionsException;
@@ -57,7 +58,7 @@ class GetTask extends AbstractCacheTask
                 return;
             }
             if (self::ON_MISS_FAIL === $mergedOptions['on_miss']) {
-                throw new \UnexpectedValueException("Cache item {$mergedOptions['key']} is missing from adapter {$mergedOptions['adapter']}");
+                throw new UnexpectedValueException("Cache item {$mergedOptions['key']} is missing from adapter {$mergedOptions['adapter']}");
             }
         }
 

@@ -13,9 +13,11 @@ declare(strict_types=1);
 
 namespace CleverAge\CacheProcessBundle\Exception;
 
+use CleverAge\ProcessBundle\Exception\ProcessExceptionInterface;
+
 /**
  * Exception thrown when trying to fetch a missing Cache Adapter.
  */
-class MissingAdapterException extends \Exception
+class MissingAdapterException extends \Exception implements ProcessExceptionInterface
 {
 }

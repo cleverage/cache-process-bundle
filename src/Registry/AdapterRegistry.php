@@ -15,6 +15,7 @@ namespace CleverAge\CacheProcessBundle\Registry;
 
 use CleverAge\CacheProcessBundle\Adapter\AdapterInterface;
 use CleverAge\CacheProcessBundle\Exception\MissingAdapterException;
+use CleverAge\CacheProcessBundle\Exception\UnexpectedValueException;
 use Symfony\Contracts\Service\ServiceProviderInterface;
 
 /**
@@ -70,7 +71,7 @@ class AdapterRegistry
                 $message .= " by service \"{$definedBy}\", cannot register service \"{$serviceId}\"";
             }
 
-            throw new \UnexpectedValueException($message);
+            throw new UnexpectedValueException($message);
         }
         $this->adapters[$code] = $adapter;
         $this->serviceIds[$code] = $serviceId;
@@ -104,10 +105,10 @@ class AdapterRegistry
 
         $adapter = $this->locator->get($code);
         if (!$adapter instanceof AdapterInterface) {
-            throw new \UnexpectedValueException(\sprintf('The service of the cache adapter "%s" must implement "%s".', $code, AdapterInterface::class));
+            throw new UnexpectedValueException(\sprintf('The service of the cache adapter "%s" must implement "%s".', $code, AdapterInterface::class));
         }
         if ($code !== $adapter->getCode()) {
-            throw new \UnexpectedValueException(\sprintf('The cache adapter "%s" is registered with the code "%s" but its getCode() method returns "%s": both must be the same.', $adapter::class, $code, $adapter->getCode()));
+            throw new UnexpectedValueException(\sprintf('The cache adapter "%s" is registered with the code "%s" but its getCode() method returns "%s": both must be the same.', $adapter::class, $code, $adapter->getCode()));
         }
 
         return $this->adapters[$code] = $adapter;
