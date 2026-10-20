@@ -15,6 +15,7 @@ namespace CleverAge\CacheProcessBundle\Tests\DependencyInjection;
 
 use CleverAge\CacheProcessBundle\Attribute\AsCacheAdapter;
 use CleverAge\CacheProcessBundle\DependencyInjection\CleverAgeCacheProcessExtension;
+use CleverAge\CacheProcessBundle\DependencyInjection\Configuration;
 use CleverAge\CacheProcessBundle\Registry\AdapterRegistry;
 use CleverAge\CacheProcessBundle\Task\GetTask;
 use CleverAge\CacheProcessBundle\Task\SetTask;
@@ -32,6 +33,7 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Yaml\Yaml;
 
 #[CoversClass(CleverAgeCacheProcessExtension::class)]
+#[CoversClass(Configuration::class)]
 #[UsesClass(AdapterRegistry::class)]
 #[CoversClass(AsCacheAdapter::class)]
 class CleverAgeCacheProcessExtensionTest extends TestCase
@@ -148,6 +150,54 @@ class CleverAgeCacheProcessExtensionTest extends TestCase
             ['package' => 'cleverage/cache-process-bundle', 'version' => '2.3', 'message' => 'The "'.$deprecatedId.'" service alias is deprecated, use the "'.$code.'" task code or the class name of the task instead. It will be removed in 3.0.'],
             $alias->getDeprecation($deprecatedId)
         );
+    }
+
+    public function testConfigurationKeysAreDeprecated(): void
+    {
+        $deprecations = $this->collectDeprecations(static function (): void {
+            (new CleverAgeCacheProcessExtension())->load([[], ['foo' => true], ['bar' => 1, 'foo' => false]], new ContainerBuilder());
+        });
+
+        self::assertSame(['Since cleverage/cache-process-bundle 2.3: Configuring "clever_age_cache_process" is deprecated, the bundle has no configuration: the keys "foo", "bar" are ignored. They will be rejected in 3.0.'], $deprecations);
+    }
+
+    public function testNoDeprecationWithoutConfigurationKey(): void
+    {
+        $deprecations = $this->collectDeprecations(static function (): void {
+            (new CleverAgeCacheProcessExtension())->load([[], []], new ContainerBuilder());
+        });
+
+        self::assertSame([], $deprecations);
+    }
+
+    public function testConfigurationHasNoOption(): void
+    {
+        $configuration = (new CleverAgeCacheProcessExtension())->getConfiguration([], new ContainerBuilder());
+
+        self::assertInstanceOf(Configuration::class, $configuration);
+        self::assertSame('clever_age_cache_process', $configuration->getConfigTreeBuilder()->buildTree()->getName());
+    }
+
+    /**
+     * @param callable(): void $callback
+     *
+     * @return list<string>
+     */
+    private function collectDeprecations(callable $callback): array
+    {
+        $deprecations = [];
+        set_error_handler(static function (int $errno, string $errstr) use (&$deprecations): bool {
+            $deprecations[] = $errstr;
+
+            return true;
+        }, \E_USER_DEPRECATED);
+        try {
+            $callback();
+        } finally {
+            restore_error_handler();
+        }
+
+        return $deprecations;
     }
 }
 
