@@ -29,8 +29,8 @@ use Symfony\Component\HttpKernel\Kernel;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\inline_service;
 
 /**
- * Application used by the integration tests: process-bundle and this bundle, with an adapter declared by tag and one
- * by attribute, in a temporary directory of its own (per PHP process).
+ * Application used by the integration tests: process-bundle and this bundle, with an adapter declared by tag, one by
+ * attribute and two Symfony cache pools tagged directly, in a temporary directory of its own (per PHP process).
  */
 final class TestKernel extends Kernel
 {
@@ -80,6 +80,13 @@ final class TestKernel extends Kernel
         $services->set(AttributedAdapter::class)
             ->autoconfigure()
             ->args([inline_service(ArrayAdapter::class), 'app_attributed']);
+        // Symfony cache pools tagged directly: wrapped in an Adapter
+        $services->set('app.cache_pool', ArrayAdapter::class)
+            ->tag('cleverage.cache.adapter', ['code' => 'app_pool']);
+        $services->set('app.cache_framework_pool')
+            ->parent('cache.adapter.array')
+            ->tag('cache.pool')
+            ->tag('cleverage.cache.adapter', ['code' => 'app_framework_pool']);
         // Exposed to the tests
         $services->alias('test.adapter_registry', AdapterRegistry::class)->public();
 

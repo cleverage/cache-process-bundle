@@ -4,33 +4,14 @@ Share data between process branches
 This recipe uses an in-memory cache to store data in a first branch of a process, then read it in another branch of
 the same execution. Nothing is persisted: the values only live during the current PHP process.
 
-First, declare an in-memory cache [adapter](../reference/adapter.md) with the `memory` code:
-
-```php
-<?php
-// src/Adapter/MemoryAdapter.php
-
-declare(strict_types=1);
-
-namespace App\Adapter;
-
-use CleverAge\CacheProcessBundle\Adapter\Adapter;
-use Symfony\Component\Cache\Adapter\ArrayAdapter;
-
-class MemoryAdapter extends Adapter
-{
-    public function __construct()
-    {
-        parent::__construct(new ArrayAdapter(), 'memory');
-    }
-}
-```
+First, declare an in-memory cache [adapter](../reference/adapter.md) with the `memory` code: a Symfony `ArrayAdapter`
+tagged directly, no PHP class is needed:
 
 ```yaml
 # config/services.yaml
 services:
-    app.cleverage_cache_process.adapter.memory:
-        class: App\Adapter\MemoryAdapter
+    app.cache.memory:
+        class: Symfony\Component\Cache\Adapter\ArrayAdapter
         tags:
             - { name: cleverage.cache.adapter, code: memory }
 ```

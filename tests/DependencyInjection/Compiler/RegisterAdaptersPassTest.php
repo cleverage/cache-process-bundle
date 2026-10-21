@@ -20,6 +20,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\DependencyInjection\ChildDefinition;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
@@ -85,6 +86,90 @@ class RegisterAdaptersPassTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('The "code" attribute of the "cleverage.cache.adapter" tag of the "app.adapter" service must be a non-empty string.');
         $container->compile(true);
+    }
+
+    public function testPoolsAreWrappedInAnAdapter(): void
+    {
+        $container = $this->createContainer([]);
+        $container->setParameter('app.pool_class', ArrayAdapter::class);
+        $container->setDefinition('app.pool', new Definition(ArrayAdapter::class))
+            ->setPublic(true)
+            ->addTag('cleverage.cache.adapter', ['code' => 'pool']);
+        // Pool defined with a parent, as the FrameworkBundle pools
+        $container->setDefinition('app.abstract_pool', new Definition('%app.pool_class%'))
+            ->setAbstract(true);
+        $container->setDefinition('app.child_pool', new ChildDefinition('app.abstract_pool'))
+            ->addTag('cleverage.cache.adapter', ['code' => 'child_pool'])
+            ->addTag('cleverage.cache.adapter', ['code' => 'child_pool_other']);
+        $container->compile(true);
+
+        /** @var AdapterRegistry $registry */
+        $registry = $container->get('cleverage_cache_process.registry.adapter');
+        // Not instantiated with the registry
+        self::assertFalse($container->initialized('app.pool'));
+        $adapter = $registry->getAdapter('pool');
+        self::assertInstanceOf(Adapter::class, $adapter);
+        self::assertSame('pool', $adapter->getCode());
+        self::assertTrue($container->initialized('app.pool'));
+
+        // The items are stored in the pool
+        $item = $adapter->getItem('key');
+        $item->set('value');
+        $adapter->save($item);
+        /** @var ArrayAdapter $pool */
+        $pool = $container->get('app.pool');
+        self::assertSame('value', $pool->getItem('key')->get());
+
+        $childAdapter = $registry->getAdapter('child_pool');
+        self::assertInstanceOf(Adapter::class, $childAdapter);
+        self::assertSame('child_pool', $childAdapter->getCode());
+        // One pool shared by both codes
+        $item = $childAdapter->getItem('key');
+        $item->set('child');
+        $childAdapter->save($item);
+        self::assertSame('child', $registry->getAdapter('child_pool_other')->getItem('key')->get());
+    }
+
+    public function testServiceWithAnUnknownClassIsRegisteredAsIs(): void
+    {
+        $container = $this->createContainer([]);
+        // Checked when fetched
+        $container->setDefinition('app.adapter', (new Definition('App\\UnknownAdapter'))->setFactory([self::class, 'createAdapter']))
+            ->setPublic(true)
+            ->addTag('cleverage.cache.adapter', ['code' => 'factory']);
+        $container->compile(true);
+
+        /** @var AdapterRegistry $registry */
+        $registry = $container->get('cleverage_cache_process.registry.adapter');
+        self::assertSame($container->get('app.adapter'), $registry->getAdapter('factory'));
+    }
+
+    public function testServiceWithoutClassIsRegisteredAsIs(): void
+    {
+        $container = new ContainerBuilder();
+        $container->setDefinition('cleverage_cache_process.registry.adapter', new Definition(AdapterRegistry::class, [null]));
+        // Rejected later by the container compilation
+        $container->setDefinition('app.adapter', new Definition())
+            ->addTag('cleverage.cache.adapter', ['code' => 'adapter']);
+        (new RegisterAdaptersPass())->process($container);
+
+        self::assertFalse($container->hasDefinition('.cleverage_cache_process.adapter.adapter'));
+    }
+
+    public function testServiceThatIsNeitherAnAdapterNorAPoolFailsTheCompilation(): void
+    {
+        $container = $this->createContainer([]);
+        $container->setDefinition('app.adapter', new Definition(\stdClass::class))
+            ->addTag('cleverage.cache.adapter', ['code' => 'adapter']);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('The "app.adapter" service, tagged "cleverage.cache.adapter", must implement "CleverAge\CacheProcessBundle\Adapter\AdapterInterface" or "Symfony\Component\Cache\Adapter\AdapterInterface" (a Symfony cache pool), "stdClass" given.');
+        $container->compile(true);
+    }
+
+    public static function createAdapter(): Adapter
+    {
+        return new Adapter(new ArrayAdapter(), 'factory');
     }
 
     public function testWithoutRegistry(): void
