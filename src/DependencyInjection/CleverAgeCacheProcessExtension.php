@@ -29,6 +29,12 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
  */
 class CleverAgeCacheProcessExtension extends Extension
 {
+    #[\Override]
+    public function getAlias(): string
+    {
+        return 'cleverage_cache_process';
+    }
+
     public function load(array $configs, ContainerBuilder $container): void
     {
         $keys = array_keys(array_merge(...$configs));

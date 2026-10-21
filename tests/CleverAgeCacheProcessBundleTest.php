@@ -14,12 +14,15 @@ declare(strict_types=1);
 namespace CleverAge\CacheProcessBundle\Tests;
 
 use CleverAge\CacheProcessBundle\CleverAgeCacheProcessBundle;
+use CleverAge\CacheProcessBundle\DependencyInjection\CleverAgeCacheProcessExtension;
 use CleverAge\CacheProcessBundle\DependencyInjection\Compiler\RegisterAdaptersPass;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 #[CoversClass(CleverAgeCacheProcessBundle::class)]
+#[UsesClass(CleverAgeCacheProcessExtension::class)]
 class CleverAgeCacheProcessBundleTest extends TestCase
 {
     public function testPathIsTheBundleRoot(): void
@@ -40,5 +43,16 @@ class CleverAgeCacheProcessBundleTest extends TestCase
             static fn (object $pass): bool => $pass instanceof RegisterAdaptersPass
         );
         self::assertCount(1, $passes);
+    }
+
+    public function testExtensionAlias(): void
+    {
+        $bundle = new CleverAgeCacheProcessBundle();
+        $extension = $bundle->getContainerExtension();
+
+        self::assertInstanceOf(CleverAgeCacheProcessExtension::class, $extension);
+        self::assertSame('cleverage_cache_process', $extension->getAlias());
+        // Built once
+        self::assertSame($extension, $bundle->getContainerExtension());
     }
 }

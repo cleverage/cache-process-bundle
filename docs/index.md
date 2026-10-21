@@ -47,7 +47,7 @@ services:
             - { name: cleverage.cache.adapter, code: app }
 ```
 
-No option can be configured under `clever_age_cache_process`: a key there is ignored. Configuring one is deprecated since 2.3 (an `E_USER_DEPRECATED` error is triggered when the container is compiled), the keys will be rejected in 3.0.
+No option can be configured under `cleverage_cache_process`: a key there is ignored. Configuring one is deprecated since 2.3 (an `E_USER_DEPRECATED` error is triggered when the container is compiled), the keys will be rejected in 3.0.
 
 ## Custom cache tasks
 

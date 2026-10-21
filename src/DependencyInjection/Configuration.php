@@ -27,7 +27,7 @@ final class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('clever_age_cache_process');
+        $treeBuilder = new TreeBuilder('cleverage_cache_process');
         /** @var ArrayNodeDefinition $rootNode */
         $rootNode = $treeBuilder->getRootNode();
         $rootNode->ignoreExtraKeys();

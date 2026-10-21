@@ -13,8 +13,10 @@ declare(strict_types=1);
 
 namespace CleverAge\CacheProcessBundle;
 
+use CleverAge\CacheProcessBundle\DependencyInjection\CleverAgeCacheProcessExtension;
 use CleverAge\CacheProcessBundle\DependencyInjection\Compiler\RegisterAdaptersPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
@@ -28,6 +30,19 @@ class CleverAgeCacheProcessBundle extends Bundle
     public function build(ContainerBuilder $container): void
     {
         $container->addCompilerPass(new RegisterAdaptersPass());
+    }
+
+    /**
+     * The alias of the extension, "cleverage_cache_process", is not the one guessed from the bundle name.
+     */
+    #[\Override]
+    public function getContainerExtension(): ExtensionInterface
+    {
+        if (!$this->extension instanceof ExtensionInterface) {
+            $this->extension = new CleverAgeCacheProcessExtension();
+        }
+
+        return $this->extension;
     }
 
     #[\Override]
