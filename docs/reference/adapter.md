@@ -18,6 +18,9 @@ Adapter reference
   (`CleverAge\CacheProcessBundle\Registry\AdapterRegistry`, autowirable by its class name)
 * **Attribute**: `CleverAge\CacheProcessBundle\Attribute\AsCacheAdapter` (`#[AsCacheAdapter(code: 'memory')]`, with
   autoconfiguration), equivalent to the tag
+* **Symfony cache pool**: a service implementing `Symfony\Component\Cache\Adapter\AdapterInterface` (every Symfony
+  adapter and pool) can be tagged directly, without any adapter class: it is wrapped in an `Adapter` with the `code` of
+  the tag
 
 Constructor arguments
 ---------------------
@@ -62,7 +65,32 @@ services:
             - { name: cleverage.cache.adapter, code: memory }
 ```
 
-* Persistent adapter, wrapping a cache pool of the FrameworkBundle, without any PHP class
+* In-memory adapter, without any PHP class: a Symfony adapter tagged directly
+
+```yaml
+# config/services.yaml
+services:
+    app.cache.memory:
+        class: Symfony\Component\Cache\Adapter\ArrayAdapter
+        tags:
+            - { name: cleverage.cache.adapter, code: memory }
+```
+
+* Persistent adapter, a cache pool defined as a service (as the ones of `framework.cache.pools`: namespace, lifetime
+  and clearer handled by the FrameworkBundle) and tagged directly
+
+```yaml
+# config/services.yaml
+services:
+    app.cache.catalog:
+        parent: cache.adapter.filesystem
+        tags:
+            - { name: cache.pool, default_lifetime: 86400 }
+            - { name: cleverage.cache.adapter, code: catalog }
+```
+
+* Persistent adapter, wrapping a pool of `framework.cache.pools` (its service is created by the FrameworkBundle, it
+  cannot be tagged by the application)
 
 ```yaml
 # config/packages/cache.yaml
@@ -95,6 +123,11 @@ Notes
   otherwise when it is fetched). Two adapters with the same code, or an empty code, fail the container compilation.
   `AdapterRegistry::hasAdapter()` and `getAdapters()` (which instantiates every adapter) are available, e.g. in a
   custom cache task.
+* A tagged Symfony cache pool (a service implementing `Symfony\Component\Cache\Adapter\AdapterInterface`, but not the
+  `AdapterInterface` of the bundle) is wrapped in an `Adapter` (`.cleverage_cache_process.adapter.<code>` service),
+  instantiated with the pool when a task uses it; several codes on one pool share its items. The interface is checked
+  from the class of the service (or of its `parent`): a tagged service implementing neither interface fails the container
+  compilation. A pool must be tagged with a `code`.
 * **Deprecated**: a service tagged without `code` is still registered, with `AdapterRegistry::addAdapter()`,
   instantiated with the registry (deprecated since 2.3, the `code` will be required in 3.0). Two adapters with the same
   code then throw an `\UnexpectedValueException` giving the ids of both services

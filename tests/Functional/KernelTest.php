@@ -56,6 +56,23 @@ class KernelTest extends KernelTestCase
         self::assertInstanceOf(AttributedAdapter::class, $registry->getAdapter('app_attributed'));
     }
 
+    public function testPoolsAreWrappedInAnAdapter(): void
+    {
+        $registry = self::getContainer()->get('test.adapter_registry');
+        self::assertInstanceOf(AdapterRegistry::class, $registry);
+
+        foreach (['app_pool', 'app_framework_pool'] as $code) {
+            $adapter = $registry->getAdapter($code);
+            self::assertInstanceOf(Adapter::class, $adapter);
+            self::assertSame($code, $adapter->getCode());
+
+            $item = $adapter->getItem('key');
+            $item->set($code);
+            $adapter->save($item);
+            self::assertSame($code, $adapter->getItem('key')->get());
+        }
+    }
+
     public function testTasksAreResolvedByCode(): void
     {
         if (!class_exists(TaskRegistry::class)) {
