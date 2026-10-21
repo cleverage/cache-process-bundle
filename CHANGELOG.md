@@ -1,7 +1,12 @@
 Latest
 ------
 
+v2.3
+------
+
 ### Changes
+* Require `cleverage/process-bundle` `^5.4`.
+* Please follow [UPGRADE.md v2.3](UPGRADE.md#v23)
 * [#67](https://github.com/cleverage/cache-process-bundle/issues/67) A Symfony cache pool (a service implementing `Symfony\Component\Cache\Adapter\AdapterInterface`, e.g. `parent: cache.adapter.filesystem` or `class: ArrayAdapter`) can be tagged directly `cleverage.cache.adapter` with a `code`, without any adapter class: `RegisterAdaptersPass` wraps it in an `Adapter` with this code, loaded lazily. A tagged service implementing neither this interface nor the `AdapterInterface` of the bundle fails the container compilation. Update documentation, add tests.
 * [#65](https://github.com/cleverage/cache-process-bundle/issues/65) The configuration key of the bundle (its extension alias) is `cleverage_cache_process`, instead of `clever_age_cache_process` (no option could be configured there). Configuring a key under `cleverage_cache_process` is deprecated: the bundle has no configuration and the keys were ignored without notice (new internal `Configuration`, empty; notice when the container is compiled). They will be rejected in 3.0. Require `symfony/deprecation-contracts`, used directly. Update documentation, add tests.
 * [#63](https://github.com/cleverage/cache-process-bundle/issues/63) The bundle throws exceptions implementing `ProcessExceptionInterface` of the process bundle instead of raw SPL exceptions (as [cleverage/process-bundle#317](https://github.com/cleverage/process-bundle/issues/317)): new `Exception\UnexpectedValueException`, extending the SPL exceptions thrown before (same messages, the existing `catch` keep working). `MissingAdapterException` implements `ProcessExceptionInterface`. Add tests.
