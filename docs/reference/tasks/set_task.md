@@ -13,11 +13,11 @@ Task reference
 Accepted inputs
 ---------------
 
-`array` or empty (`null`): if the input is not empty, its keys `adapter`, `key` and `value` override the options of the
-same name, and are validated like the options (e.g. a non-string `key` throws an `InvalidOptionsException`). Other
-input keys are ignored.
+`array` or empty (`null`): if the input is not empty, its keys named after an option (`adapter`, `key`, `value`,
+`expires_after`) override the options of the same name, and are validated like the options (e.g. a non-string `key`
+throws an `InvalidOptionsException`). Other input keys are ignored.
 
-Any other non-empty input (e.g. a `string`) throws an `\UnexpectedValueException`.
+Any other non-empty input (e.g. a `string`) throws an `UnexpectedValueException`.
 
 Possible outputs
 ----------------

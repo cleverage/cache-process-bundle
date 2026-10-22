@@ -119,7 +119,7 @@ Notes
 
 * The adapters are registered by the `code` attribute of their tag, in a service locator built when the container is
   compiled: an adapter is only instantiated when a task uses it (an error in an adapter that a process does not use
-  does not make it fail). The `code` must be the one returned by `getCode()` (an `\UnexpectedValueException` is thrown
+  does not make it fail). The `code` must be the one returned by `getCode()` (an `UnexpectedValueException` is thrown
   otherwise when it is fetched). Two adapters with the same code, or an empty code, fail the container compilation.
   `AdapterRegistry::hasAdapter()` and `getAdapters()` (which instantiates every adapter) are available, e.g. in a
   custom cache task.
@@ -130,7 +130,7 @@ Notes
   compilation. A pool must be tagged with a `code`.
 * **Deprecated**: a service tagged without `code` is still registered, with `AdapterRegistry::addAdapter()`,
   instantiated with the registry (deprecated since 2.3, the `code` will be required in 3.0). Two adapters with the same
-  code then throw an `\UnexpectedValueException` giving the ids of both services
+  code then throw an `UnexpectedValueException` giving the ids of both services
   (`Adapter <code> is already defined by service "<id>", cannot register service "<id>"`) when the registry is
   instantiated, i.e. the first time a cache task is used.
 * Using a code that is not registered throws a `CleverAge\CacheProcessBundle\Exception\MissingAdapterException`
