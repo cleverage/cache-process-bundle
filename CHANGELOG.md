@@ -1,6 +1,9 @@
 Latest
 ------
 
+v2.4
+------
+
 ### Changes
 * [#78](https://github.com/cleverage/cache-process-bundle/issues/78) Reference pages: exceptions of the bundle, input keys of `cache_get` / `cache_set`.
 
