@@ -13,11 +13,11 @@ Task reference
 Accepted inputs
 ---------------
 
-`array` or empty (`null`): if the input is not empty, its keys `adapter` and `key` override the options of the same
-name, and are validated like the options (e.g. a non-string `key` throws an `InvalidOptionsException`). Other input
-keys are ignored.
+`array` or empty (`null`): if the input is not empty, its keys named after an option (`adapter`, `key`, `on_miss`)
+override the options of the same name, and are validated like the options (e.g. a non-string `key` throws an
+`InvalidOptionsException`). Other input keys are ignored.
 
-Any other non-empty input (e.g. a `string`) throws an `\UnexpectedValueException`.
+Any other non-empty input (e.g. a `string`) throws an `UnexpectedValueException`.
 
 Possible outputs
 ----------------
@@ -42,7 +42,7 @@ input, an option given by neither throws a `MissingOptionsException` on executio
 * `output_null`: output `null`, as for an item stored with a `null` value.
 * `skip`: skip the item and send the input to the error outputs (`error_outputs`), e.g. to compute the missing value
   and store it.
-* `fail`: throw an `\UnexpectedValueException` (`Cache item <key> is missing from adapter <adapter>`).
+* `fail`: throw an `UnexpectedValueException` (`Cache item <key> is missing from adapter <adapter>`).
 
 Examples
 --------

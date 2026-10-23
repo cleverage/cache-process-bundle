@@ -115,3 +115,10 @@ delete_from_cache:
 
 - [Share data between process branches](cookbooks/share_data_between_branches.md)
 - [Warm up a persistent cache from a file](cookbooks/cache_warmup.md)
+
+## Exceptions
+
+The exceptions named without namespace in the reference pages (e.g. `UnexpectedValueException`) are the ones of the
+bundle, `CleverAge\CacheProcessBundle\Exception\*`: they extend the SPL exceptions of the same name and implement
+`CleverAge\ProcessBundle\Exception\ProcessExceptionInterface`, so that all the errors of the process bundles can be
+caught at once.
